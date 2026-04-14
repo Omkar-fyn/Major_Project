@@ -1,0 +1,134 @@
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+  transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+  color: var(--accent-primary);
+}
+
+.formCard {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  animation: fadeInUp 0.5s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.formTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.formSub {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: var(--space-2xl);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--space-2xl);
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.computedField {
+  padding: 0.65rem 0.9rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.uploadZone {
+  width: 100%;
+  height: 300px;
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  background: var(--bg-secondary);
+}
+
+.uploadZone:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-dim);
+}
+
+.uploadPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.uploadPlaceholder {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.uploadPlaceholder p {
+  margin-top: var(--space-sm);
+  font-size: 0.88rem;
+}
+
+.uploadHint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.successMsg {
+  padding: var(--space-md);
+  background: var(--accent-green-dim);
+  border: 1px solid rgba(10, 179, 156, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-green);
+  font-weight: 500;
+  margin-bottom: var(--space-lg);
+}
+
+.errorMsg {
+  padding: var(--space-md);
+  background: var(--accent-red-dim);
+  border: 1px solid rgba(240, 101, 72, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-red);
+  font-size: 0.82rem;
+  margin-bottom: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+
+  .uploadZone {
+    height: 200px;
+  }
+}
