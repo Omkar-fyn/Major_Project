@@ -1,25 +1,23 @@
-import './globals.css';
-import { AuthProvider } from '@/context/AuthContext';
-import Navbar from '@/components/Navbar';
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Providers from "./providers";
 
 export const metadata = {
-  title: 'Asset-Tokenization — Tokenized Real Estate Investment',
-  description: 'Invest in tokenized real estate properties. Buy fractional tokens of premium properties across India. Blockchain-powered real estate investment platform.',
-  keywords: 'asset tokenization, real estate tokenization, fractional ownership, property investment, blockchain, tokenized real estate, Asset-Chain',
+  title: "Asset Tokenization — Tokenize · Invest · Grow",
+  description:
+    "Invest in tokenized real estate properties with fractional ownership. Real Assets. Real Ownership. Real Future.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
       <body>
-        <AuthProvider>
+        <Providers>
           <Navbar />
           <main>{children}</main>
-        </AuthProvider>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

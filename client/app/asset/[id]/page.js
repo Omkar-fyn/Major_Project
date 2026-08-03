@@ -2,8 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import { assetAPI, transactionAPI } from '@/lib/api';
+import TokenDistributionChart from '@/components/charts/TokenDistributionChart';
+import PriceSimulationChart from '@/components/charts/PriceSimulationChart';
+import { getSigner, getContracts } from '@/lib/web3';
+import { ethers } from 'ethers';
 import styles from './page.module.css';
 
 export default function AssetDetailPage() {
@@ -17,6 +21,9 @@ export default function AssetDetailPage() {
   const [buying, setBuying] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [tradeMode, setTradeMode] = useState('buy'); // 'buy' or 'sell'
+  // Key to force chart re-render after purchase
+  const [chartKey, setChartKey] = useState(0);
 
   const SERVER_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '');
 
@@ -40,19 +47,80 @@ export default function AssetDetailPage() {
 
   const handleBuy = async () => {
     if (!user) {
-      router.push('/login');
+      router.push('/auth/login');
       return;
     }
 
     setErrorMsg('');
     setBuying(true);
     try {
-      const data = await transactionAPI.buy(id, parseInt(tokenCount));
-      setSuccessMsg(data.transaction);
+      // Web3 Transaction
+      const signer = await getSigner();
+      const { ammContract } = getContracts(signer);
+      
+      // Calculate ETH to send (assuming pricePerToken is in ETH, but it's currently in INR in the UI)
+      // Since it's a simulated ETH, we'll parse the INR value as a small ETH value or use the exact string
+      // Let's assume asset.pricePerToken represents ETH cost internally for testing purposes.
+      const ethAmount = (asset.pricePerToken * tokenCount).toString();
+      
+      const tx = await ammContract.buyTokens({
+        value: ethers.parseEther(ethAmount)
+      });
+      
+      // Wait for tx to be mined
+      const receipt = await tx.wait();
+
+      // Sync with backend
+      const data = await transactionAPI.sync(id, parseInt(tokenCount), receipt.hash, 'buy');
+      
+      setSuccessMsg({ ...data.transaction, txHash: receipt.hash });
       await refreshUser();
-      fetchAsset();
+      await fetchAsset();
+      setChartKey(prev => prev + 1);
     } catch (err) {
-      setErrorMsg(err.message);
+      console.error(err);
+      setErrorMsg(err.message || "Transaction failed");
+    } finally {
+      setBuying(false);
+    }
+  };
+
+  const handleSell = async () => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!ownership || ownership.tokensOwned < tokenCount) {
+      setErrorMsg("You don't own enough tokens to sell.");
+      return;
+    }
+
+    setErrorMsg('');
+    setBuying(true); // Using same loading state variable
+    try {
+      const signer = await getSigner();
+      const { ammContract, tokenContract } = getContracts(signer);
+      const ammAddress = await ammContract.getAddress();
+      
+      // Approve AMM to spend tokens
+      const approveTx = await tokenContract.approve(ammAddress, tokenCount);
+      await approveTx.wait();
+      
+      // Sell tokens
+      const tx = await ammContract.sellTokens(tokenCount);
+      const receipt = await tx.wait();
+
+      // Sync with backend
+      const data = await transactionAPI.sync(id, parseInt(tokenCount), receipt.hash, 'sell');
+      
+      setSuccessMsg({ ...data.transaction, txHash: receipt.hash });
+      await refreshUser();
+      await fetchAsset();
+      setChartKey(prev => prev + 1);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message || "Transaction failed");
     } finally {
       setBuying(false);
     }
@@ -63,9 +131,9 @@ export default function AssetDetailPage() {
       <div className="page-wrapper">
         <div className="container">
           <div className={styles.loadingState}>
-            <div className="skeleton" style={{height: '300px', borderRadius: '12px'}}></div>
-            <div className="skeleton" style={{height: '24px', width: '60%', marginTop: '24px'}}></div>
-            <div className="skeleton" style={{height: '16px', width: '40%', marginTop: '12px'}}></div>
+            <div className="skeleton" style={{ height: '300px', borderRadius: '12px' }}></div>
+            <div className="skeleton" style={{ height: '24px', width: '60%', marginTop: '24px' }}></div>
+            <div className="skeleton" style={{ height: '16px', width: '40%', marginTop: '12px' }}></div>
           </div>
         </div>
       </div>
@@ -75,9 +143,9 @@ export default function AssetDetailPage() {
   if (!asset) {
     return (
       <div className="page-wrapper">
-        <div className="container" style={{textAlign: 'center', padding: '4rem'}}>
+        <div className="container" style={{ textAlign: 'center', padding: '4rem' }}>
           <h2>Property not found</h2>
-          <Link href="/" className="btn btn-primary" style={{marginTop: '1rem'}}>Back to Marketplace</Link>
+          <Link href="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>Back to Marketplace</Link>
         </div>
       </div>
     );
@@ -135,10 +203,10 @@ export default function AssetDetailPage() {
           <div className={styles.assetInfo}>
             <div className={styles.imageSection}>
               {asset.image ? (
-                <img src={`${SERVER_URL}${asset.image}`} alt={asset.name} className={styles.assetImage}/>
+                <img src={`${SERVER_URL}${asset.image}`} alt={asset.name} className={styles.assetImage} />
               ) : (
                 <div className={styles.imagePlaceholder}>
-                  <span style={{fontSize: '4rem'}}>🏢</span>
+                  <span style={{ fontSize: '4rem' }}>🏢</span>
                 </div>
               )}
             </div>
@@ -178,13 +246,27 @@ export default function AssetDetailPage() {
               </div>
             </div>
 
+            {/* Charts Section */}
+            <div className={styles.chartsSection}>
+              <TokenDistributionChart
+                key={`pie-${chartKey}`}
+                totalTokens={asset.totalTokens}
+                availableTokens={asset.availableTokens}
+              />
+              <PriceSimulationChart
+                key={`price-${chartKey}`}
+                assetId={id}
+                basePrice={asset.pricePerToken}
+              />
+            </div>
+
             {/* Ownership Distribution */}
             {ownership && (
               <div className={styles.ownershipSection}>
                 <h3 className={styles.subHeading}>Ownership Distribution</h3>
                 <div className={styles.ownershipBarWrap}>
                   <div className="ownership-bar">
-                    <div className="ownership-bar-fill" style={{width: `${soldPercentage}%`}}></div>
+                    <div className="ownership-bar-fill" style={{ width: `${soldPercentage}%` }}></div>
                   </div>
                   <div className={styles.ownershipStats}>
                     <span>{soldPercentage}% Sold</span>
@@ -208,7 +290,7 @@ export default function AssetDetailPage() {
                           {ownership.topHolders.map((h, i) => (
                             <tr key={i}>
                               <td>{h.name}</td>
-                              <td><code style={{fontSize: '0.72rem', color: 'var(--accent-primary)'}}>{h.walletId?.substring(0, 12)}...</code></td>
+                              <td><code style={{ fontSize: '0.72rem', color: 'var(--accent-primary)' }}>{h.walletId?.substring(0, 12)}...</code></td>
                               <td>{h.tokensOwned?.toLocaleString()}</td>
                               <td>{h.percentage}%</td>
                             </tr>
@@ -225,8 +307,21 @@ export default function AssetDetailPage() {
           {/* Right: Buy Panel */}
           <div className={styles.buyPanel}>
             <div className={styles.buyCard}>
-              <h3 className={styles.buyTitle}>Buy Tokens</h3>
-              <p className={styles.buySubtitle}>Invest in fractional ownership</p>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '1.5rem' }}>
+                <button 
+                  className={`btn ${tradeMode === 'buy' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1 }}
+                  onClick={() => setTradeMode('buy')}
+                >Buy</button>
+                <button 
+                  className={`btn ${tradeMode === 'sell' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1 }}
+                  onClick={() => setTradeMode('sell')}
+                >Sell</button>
+              </div>
+
+              <h3 className={styles.buyTitle}>{tradeMode === 'buy' ? 'Buy Tokens' : 'Sell Tokens'}</h3>
+              <p className={styles.buySubtitle}>{tradeMode === 'buy' ? 'Invest in fractional ownership' : 'Liquidate your tokens for ETH'}</p>
 
               {user && (
                 <div className={styles.balanceInfo}>
@@ -246,7 +341,7 @@ export default function AssetDetailPage() {
                   <input
                     type="number"
                     className="form-input"
-                    style={{textAlign: 'center', fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '1.1rem'}}
+                    style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '1.1rem' }}
                     value={tokenCount}
                     onChange={(e) => {
                       const v = parseInt(e.target.value) || 1;
@@ -293,25 +388,25 @@ export default function AssetDetailPage() {
               )}
 
               <button
-                className="btn btn-primary btn-lg btn-full"
-                onClick={handleBuy}
-                disabled={buying || asset.status !== 'active' || (user && user.walletBalance < totalCost)}
+                className={`btn ${tradeMode === 'buy' ? 'btn-primary' : 'btn-secondary'} btn-lg btn-full`}
+                onClick={tradeMode === 'buy' ? handleBuy : handleSell}
+                disabled={buying || (tradeMode === 'buy' && (asset.status !== 'active' || (user && user.walletBalance < totalCost)))}
               >
                 {buying ? (
-                  <span style={{display: 'inline-block', width: 20, height: 20, border: '2px solid transparent', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite'}}></span>
+                  <span style={{ display: 'inline-block', width: 20, height: 20, border: '2px solid transparent', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }}></span>
                 ) : !user ? (
-                  'Login to Buy'
-                ) : asset.status !== 'active' ? (
+                  'Login to ' + (tradeMode === 'buy' ? 'Buy' : 'Sell')
+                ) : tradeMode === 'buy' && asset.status !== 'active' ? (
                   'Sold Out'
-                ) : user.walletBalance < totalCost ? (
+                ) : tradeMode === 'buy' && user.walletBalance < totalCost ? (
                   'Insufficient Balance'
                 ) : (
-                  `Buy ${tokenCount} Token${tokenCount > 1 ? 's' : ''}`
+                  `${tradeMode === 'buy' ? 'Buy' : 'Sell'} ${tokenCount} Token${tokenCount > 1 ? 's' : ''}`
                 )}
               </button>
 
               <p className={styles.disclaimer}>
-                🔗 Transaction will be recorded on-chain once blockchain integration is live
+                🔗 Transaction processed securely on the blockchain
               </p>
             </div>
           </div>

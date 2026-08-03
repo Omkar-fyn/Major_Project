@@ -1,0 +1,181 @@
+IEEE RESEARCH PAPER HANDBOOK
+
+Asset Tokenization Platform Using Ethereum Blockchain
+
+Version 1.0
+
+================================================================== PART
+1 – RESEARCH MINDSET
+==================================================================
+
+A research paper is not a project report.
+
+A project report explains what you built. A research paper explains: -
+Why the problem matters. - What previous researchers have done. - What
+limitations exist. - What you propose. - Why your approach is better or
+different. - Evidence supporting your claims.
+
+Every paragraph should answer one of these questions: 1. What is the
+problem? 2. Why does it exist? 3. What have others done? 4. What is
+still missing? 5. What is your solution? 6. Does it work?
+
+================================================================== PART
+2 – BEFORE WRITING
+==================================================================
+
+Collect: - IEEE template - Research papers - Notes from each paper -
+Figures - Screenshots - Architecture diagrams - References
+
+Create folders: 01_Papers 02_Images 03_Diagrams 04_References 05_Drafts
+06_Final
+
+================================================================== PART
+3 – TITLE RULES
+==================================================================
+
+Good titles are: - Specific - Technical - Concise - Searchable
+
+Good example: Asset Tokenization Platform for Fractional Ownership of
+Real-World Assets Using Ethereum Smart Contracts
+
+Avoid: - A Study on… - Project Report - Mini Project - Final Year
+Project
+
+================================================================== PART
+4 – ABSTRACT CHECKLIST
+==================================================================
+
+Order: 1. Background 2. Problem 3. Proposed system 4. Technologies 5.
+Results 6. Conclusion
+
+Never include: - Citations - Equations - Bullet points - Tables -
+Figures
+
+================================================================== PART
+5 – INTRODUCTION
+==================================================================
+
+Suggested flow: Paragraph 1: Importance of blockchain and digital
+assets.
+
+Paragraph 2: Problems with traditional asset ownership.
+
+Paragraph 3: Need for tokenization.
+
+Paragraph 4: Project objectives.
+
+Paragraph 5: Paper contributions.
+
+================================================================== PART
+6 – LITERATURE SURVEY
+==================================================================
+
+For every paper: - Citation - Objective - Method - Findings -
+Limitations - Relevance
+
+Never criticize without evidence.
+
+End with: Research Gap: Explain exactly what existing work lacks and how
+your work addresses it.
+
+================================================================== PART
+7 – METHODOLOGY
+==================================================================
+
+Explain: Input → Validation → Asset Registration → Smart Contract
+Deployment → Token Generation → Purchase Flow → Ownership Update →
+Portfolio
+
+Do not mix implementation details with methodology.
+
+================================================================== PART
+8 – IMPLEMENTATION
+==================================================================
+
+Describe: Frontend Backend Database Blockchain Wallet Integration
+Testing
+
+================================================================== PART
+9 – RESULTS
+==================================================================
+
+Present only verified results.
+
+Include: - Screenshots - Performance observations - Comparison tables -
+Limitations
+
+Never fabricate benchmarks.
+
+================================================================== PART
+10 – FIGURES
+==================================================================
+
+Rules: - Number sequentially. - Use clear captions. - Mention every
+figure in text. - Maintain consistent style.
+
+================================================================== PART
+11 – TABLES
+==================================================================
+
+Rules: - Caption above table. - Units where applicable. - Consistent
+formatting.
+
+================================================================== PART
+12 – REFERENCES
+==================================================================
+
+Use IEEE numbering.
+
+Reference every non-original idea.
+
+================================================================== PART
+13 – WRITING STYLE
+==================================================================
+
+Use: “The proposed system…” “This study…” “The platform…”
+
+Avoid: “I” “We” “You”
+
+Keep paragraphs between 80 and 150 words where practical.
+
+================================================================== PART
+14 – COMMON REASONS IEEE PAPERS ARE REJECTED
+==================================================================
+
+-   No novelty.
+-   Weak literature review.
+-   Poor English.
+-   Missing citations.
+-   Unsupported claims.
+-   Incomplete evaluation.
+-   Formatting errors.
+-   Poor figures.
+-   Plagiarism.
+-   Inconsistent terminology.
+
+================================================================== PART
+15 – PROJECT-SPECIFIC NOTES
+==================================================================
+
+Project: Asset Tokenization Platform
+
+Technology: React.js Node.js Express.js MongoDB Solidity Ethereum
+MetaMask Hardhat
+
+Possible contributions: - Fractional ownership - Secure smart
+contracts - Transparent ownership records - Wallet integration -
+Decentralized transaction flow
+
+================================================================== PART
+16 – MASTER CHECKLIST
+==================================================================
+
+Before submission: [ ] IEEE template [ ] Complete abstract [ ] Strong
+introduction [ ] Literature survey with research gap [ ] Methodology [ ]
+Architecture diagram [ ] Implementation [ ] Results [ ] Conclusion [ ]
+References [ ] Grammar review [ ] Plagiarism review [ ] Final PDF
+validation
+
+================================================================== This
+handbook should evolve alongside the project. Update it whenever new
+sections, experiments, or reviewer feedback are added.

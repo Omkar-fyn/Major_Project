@@ -83,6 +83,14 @@
   margin-bottom: var(--space-2xl);
 }
 
+/* Charts Section */
+.chartsSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
 /* Ownership */
 .ownershipSection {
   margin-top: var(--space-xl);
@@ -357,6 +365,10 @@
 
   .buyPanel {
     position: static;
+  }
+
+  .chartsSection {
+    grid-template-columns: 1fr;
   }
 }
 

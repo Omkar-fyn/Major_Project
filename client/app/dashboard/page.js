@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import { transactionAPI } from '@/lib/api';
+import InvestmentChart from '@/components/charts/InvestmentChart';
 import styles from './page.module.css';
 
 export default function DashboardPage() {
@@ -16,7 +17,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push('/auth/login');
       return;
     }
     if (user) fetchData();
@@ -41,7 +42,7 @@ export default function DashboardPage() {
     return (
       <div className="page-wrapper">
         <div className="container">
-          <div className="skeleton" style={{height: 200, borderRadius: 16}}></div>
+          <div className="skeleton" style={{ height: 200, borderRadius: 16 }}></div>
         </div>
       </div>
     );
@@ -94,6 +95,13 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Investment Distribution Chart */}
+        {!loading && (
+          <div className={styles.chartSection}>
+            <InvestmentChart holdings={portfolio?.holdings || []} />
+          </div>
+        )}
+
         {/* Tabs */}
         <div className={styles.tabs}>
           <button
@@ -114,7 +122,7 @@ export default function DashboardPage() {
         {loading ? (
           <div>
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="skeleton" style={{height: 60, marginBottom: 12, borderRadius: 10}}></div>
+              <div key={i} className="skeleton" style={{ height: 60, marginBottom: 12, borderRadius: 10 }}></div>
             ))}
           </div>
         ) : activeTab === 'portfolio' ? (
@@ -124,7 +132,7 @@ export default function DashboardPage() {
                 <span className={styles.emptyIcon}>📭</span>
                 <h3>No assets yet</h3>
                 <p>Start investing in the marketplace to build your portfolio</p>
-                <Link href="/" className="btn btn-primary" style={{marginTop: '1rem'}}>Browse Assets</Link>
+                <Link href="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>Browse Assets</Link>
               </div>
             ) : (
               <div className="table-wrapper">
@@ -149,15 +157,15 @@ export default function DashboardPage() {
                           </div>
                         </td>
                         <td><span className="badge badge-cyan">{h.asset?.category}</span></td>
-                        <td style={{fontFamily: 'var(--font-mono)', fontWeight: 600}}>{h.tokensOwned}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{h.tokensOwned}</td>
                         <td>
                           <div className={styles.miniBar}>
-                            <div className={styles.miniBarFill} style={{width: `${h.percentageOwned}%`}}></div>
+                            <div className={styles.miniBarFill} style={{ width: `${h.percentageOwned}%` }}></div>
                           </div>
-                          <span style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>{h.percentageOwned}%</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{h.percentageOwned}%</span>
                         </td>
-                        <td style={{fontFamily: 'var(--font-mono)'}}>₹{h.totalInvested?.toLocaleString('en-IN')}</td>
-                        <td style={{fontFamily: 'var(--font-mono)', color: 'var(--accent-green)'}}>₹{h.currentValue?.toLocaleString('en-IN')}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>₹{h.totalInvested?.toLocaleString('en-IN')}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}>₹{h.currentValue?.toLocaleString('en-IN')}</td>
                         <td>
                           <Link href={`/asset/${h.asset?._id}`} className={styles.viewLink}>View</Link>
                         </td>
@@ -194,14 +202,14 @@ export default function DashboardPage() {
                   <tbody>
                     {transactions.map((tx, i) => (
                       <tr key={i}>
-                        <td style={{fontSize: '0.82rem'}}>{new Date(tx.createdAt).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'})}</td>
+                        <td style={{ fontSize: '0.82rem' }}>{new Date(tx.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                         <td><strong>{tx.asset?.name}</strong></td>
                         <td><span className={`badge ${tx.type === 'buy' ? 'badge-green' : 'badge-red'}`}>{tx.type?.toUpperCase()}</span></td>
-                        <td style={{fontFamily: 'var(--font-mono)'}}>{tx.tokensBought}</td>
-                        <td style={{fontFamily: 'var(--font-mono)'}}>₹{tx.pricePerToken?.toLocaleString('en-IN')}</td>
-                        <td style={{fontFamily: 'var(--font-mono)', fontWeight: 600}}>₹{tx.totalCost?.toLocaleString('en-IN')}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{tx.tokensBought}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>₹{tx.pricePerToken?.toLocaleString('en-IN')}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>₹{tx.totalCost?.toLocaleString('en-IN')}</td>
                         <td><span className={`badge ${tx.status === 'completed' ? 'badge-green' : 'badge-gold'}`}>{tx.status}</span></td>
-                        <td><code style={{fontSize: '0.7rem', color: 'var(--accent-cyan)'}}>{tx.blockchainTxHash?.substring(0, 14)}...</code></td>
+                        <td><code style={{ fontSize: '0.7rem', color: 'var(--accent-cyan)' }}>{tx.blockchainTxHash?.substring(0, 14)}...</code></td>
                       </tr>
                     ))}
                   </tbody>

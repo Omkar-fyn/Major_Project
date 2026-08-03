@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import styles from '../login/page.module.css';
 
 export default function SignupPage() {
@@ -115,7 +115,7 @@ export default function SignupPage() {
 
           <p className={styles.authFooter}>
             Already have an account?{' '}
-            <Link href="/login" className={styles.authLink}>Log in</Link>
+            <Link href="/auth/login" className={styles.authLink}>Log in</Link>
           </p>
         </div>
       </div>

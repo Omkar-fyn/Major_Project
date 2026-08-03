@@ -17,7 +17,6 @@ export default function Home() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.append('category', 'real-estate');
       if (searchQuery) params.append('search', searchQuery);
       const data = await assetAPI.getAll(params.toString());
       setAssets(data.assets);

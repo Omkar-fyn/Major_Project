@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import styles from './page.module.css';
 
 export default function LoginPage() {
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
           <p className={styles.authFooter}>
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className={styles.authLink}>Sign up</Link>
+            <Link href="/auth/signup" className={styles.authLink}>Sign up</Link>
           </p>
 
           <div className={styles.demoCredentials}>
@@ -93,7 +93,7 @@ export default function LoginPage() {
             </div>
             <div className={styles.demoRow}>
               <span>Admin:</span>
-              <code>admin@tokenize.com / admin123</code>
+              <code>admin@assetchain.com / admin123</code>
             </div>
           </div>
         </div>

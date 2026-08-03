@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import { adminAPI } from '@/lib/api';
 import styles from './page.module.css';
 
@@ -44,7 +44,7 @@ export default function AdminPage() {
     return (
       <div className="page-wrapper">
         <div className="container">
-          <div className="skeleton" style={{height: 200, borderRadius: 16}}></div>
+          <div className="skeleton" style={{ height: 200, borderRadius: 16 }}></div>
         </div>
       </div>
     );
@@ -117,16 +117,16 @@ export default function AdminPage() {
                       <tr key={i}>
                         <td>{tx.user?.name || 'N/A'}</td>
                         <td>{tx.asset?.name || 'N/A'}</td>
-                        <td style={{fontFamily: 'var(--font-mono)'}}>{tx.tokensBought}</td>
-                        <td style={{fontFamily: 'var(--font-mono)', color: 'var(--accent-green)'}}>₹{tx.totalCost?.toLocaleString('en-IN')}</td>
-                        <td style={{fontSize: '0.82rem'}}>{new Date(tx.createdAt).toLocaleDateString('en-IN')}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{tx.tokensBought}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}>₹{tx.totalCost?.toLocaleString('en-IN')}</td>
+                        <td style={{ fontSize: '0.82rem' }}>{new Date(tx.createdAt).toLocaleDateString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             ) : (
-              <p style={{color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem'}}>No transactions yet</p>
+              <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>No transactions yet</p>
             )}
           </div>
         )}
@@ -150,9 +150,9 @@ export default function AdminPage() {
                     <td><strong>{u.name}</strong></td>
                     <td>{u.email}</td>
                     <td><span className={`badge ${u.role === 'admin' ? 'badge-gold' : 'badge-cyan'}`}>{u.role}</span></td>
-                    <td><code style={{fontSize: '0.72rem', color: 'var(--accent-cyan)'}}>{u.walletId?.substring(0, 16)}...</code></td>
-                    <td style={{fontFamily: 'var(--font-mono)'}}>₹{u.walletBalance?.toLocaleString('en-IN')}</td>
-                    <td style={{fontSize: '0.82rem'}}>{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
+                    <td><code style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)' }}>{u.walletId?.substring(0, 16)}...</code></td>
+                    <td style={{ fontFamily: 'var(--font-mono)' }}>₹{u.walletBalance?.toLocaleString('en-IN')}</td>
+                    <td style={{ fontSize: '0.82rem' }}>{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -177,12 +177,12 @@ export default function AdminPage() {
               <tbody>
                 {transactions.map((tx, i) => (
                   <tr key={i}>
-                    <td style={{fontSize: '0.82rem'}}>{new Date(tx.createdAt).toLocaleDateString('en-IN')}</td>
+                    <td style={{ fontSize: '0.82rem' }}>{new Date(tx.createdAt).toLocaleDateString('en-IN')}</td>
                     <td>{tx.user?.name}</td>
                     <td>{tx.asset?.name}</td>
                     <td><span className={`badge ${tx.type === 'buy' ? 'badge-green' : 'badge-red'}`}>{tx.type?.toUpperCase()}</span></td>
-                    <td style={{fontFamily: 'var(--font-mono)'}}>{tx.tokensBought}</td>
-                    <td style={{fontFamily: 'var(--font-mono)', fontWeight: 600}}>₹{tx.totalCost?.toLocaleString('en-IN')}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)' }}>{tx.tokensBought}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>₹{tx.totalCost?.toLocaleString('en-IN')}</td>
                     <td><span className={`badge ${tx.status === 'completed' ? 'badge-green' : 'badge-gold'}`}>{tx.status}</span></td>
                   </tr>
                 ))}

@@ -14,8 +14,8 @@ const assetSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['real-estate', 'gold', 'vehicle', 'commodity', 'art', 'other'],
-    default: 'other'
+    enum: ['residential', 'commercial', 'industrial', 'land'],
+    default: 'commercial'
   },
   image: {
     type: String,
@@ -31,6 +31,23 @@ const assetSchema = new mongoose.Schema({
     required: [true, 'Total tokens is required'],
     min: 1
   },
+  propertyAddress: {
+    type: String,
+    required: true
+  },
+  builtUpArea: {
+    type: String
+  }, // e.g. "1200 sq ft"
+  expectedRentalYield: {
+    type: Number,
+    default: 8
+  }, // % per year
+  spvCompanyName: {
+    type: String
+  }, // e.g. "PropToken SPV 001 Pvt Ltd"
+  legalDocumentUrl: {
+    type: String
+  }, // Link to title deed etc.
   availableTokens: {
     type: Number,
     required: true,
@@ -38,7 +55,6 @@ const assetSchema = new mongoose.Schema({
   },
   pricePerToken: {
     type: Number,
-    required: true,
     min: 0
   },
   contractAddress: {
@@ -71,7 +87,7 @@ const assetSchema = new mongoose.Schema({
 });
 
 // Auto-compute pricePerToken before save
-assetSchema.pre('save', function(next) {
+assetSchema.pre('save', function (next) {
   if (this.totalValue && this.totalTokens) {
     this.pricePerToken = Math.round((this.totalValue / this.totalTokens) * 100) / 100;
   }

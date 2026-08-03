@@ -1,0 +1,209 @@
+IEEE Research Paper Master Guide
+
+Project: Asset Tokenization Platform Using Ethereum Blockchain
+
+This guide is intended as the master reference while writing the IEEE
+paper for the Asset Tokenization project.
+
+------------------------------------------------------------------------
+
+1. Target Paper
+
+Write as an IEEE Conference paper (6–8 pages unless the target venue
+specifies otherwise).
+
+Write incrementally:
+
+Phase 1 - Title - Authors - Draft Abstract - Keywords - Introduction -
+Literature Survey
+
+Phase 2 - Proposed Methodology - System Architecture - Smart Contract
+Design
+
+Phase 3 - Implementation - Experimental Results - Discussion
+
+Phase 4 - Conclusion - Future Work - References
+
+------------------------------------------------------------------------
+
+2. Standard IEEE Structure
+
+1.  Title
+2.  Author Details
+3.  Abstract
+4.  Keywords
+5.  Introduction
+6.  Literature Survey / Related Work
+7.  Proposed Methodology
+8.  System Architecture
+9.  Implementation
+10. Experimental Results
+11. Discussion
+12. Conclusion
+13. Future Work (optional)
+14. References
+
+------------------------------------------------------------------------
+
+3. Section Guidelines
+
+Title - Specific and descriptive. - Avoid “A Study on…” - Mention
+blockchain/tokenization if central.
+
+Abstract 150–250 words. Must include: - Problem - Existing limitation -
+Proposed solution - Technologies - Results (draft initially) -
+Conclusion
+
+Do not cite references in the abstract.
+
+Keywords 5–8 keywords only.
+
+Introduction Explain: - Background - Problem Statement - Motivation -
+Objectives - Contributions
+
+Literature Survey For each paper include: - Authors - Year - Objective -
+Method - Results - Limitation
+
+Finish with a clear Research Gap.
+
+Methodology Explain only your proposed system.
+
+Implementation Describe technologies, modules, workflow, APIs, smart
+contracts, and database.
+
+Results Use tables, figures, screenshots, and comparisons.
+
+Conclusion Summarize contributions and future work.
+
+------------------------------------------------------------------------
+
+4. Project-Specific Focus
+
+Technology Stack - React.js - Node.js - Express.js - MongoDB -
+Solidity - Ethereum - MetaMask - Hardhat - Ethers.js/Web3.js (whichever
+is actually used)
+
+Core Features - Asset Registration - Token Creation - Fractional
+Ownership - Wallet Integration - Secure Transactions - Portfolio
+Management - Transaction History
+
+------------------------------------------------------------------------
+
+5. Writing Rules
+
+-   Use formal academic English.
+-   Use third person.
+-   Keep paragraphs focused.
+-   Define abbreviations on first use.
+-   Number all figures and tables.
+-   Refer to every figure/table in the text.
+-   Support technical claims with citations.
+
+------------------------------------------------------------------------
+
+6. IEEE Citation Rules
+
+Use IEEE numeric citations: [1], [2], [3]
+
+Number references in order of first appearance.
+
+Do not mix APA/MLA with IEEE.
+
+------------------------------------------------------------------------
+
+7. Figures
+
+Every figure needs: - Figure number - Caption - Mention in text before
+or after it
+
+Example: Fig. 1. Proposed System Architecture.
+
+Use high-resolution images.
+
+------------------------------------------------------------------------
+
+8. Tables
+
+Every table needs: - Table number - Caption above the table - Consistent
+formatting
+
+------------------------------------------------------------------------
+
+9. Language Rules
+
+Avoid: - I - We - You - Obviously - Very - Amazing - Revolutionary -
+Best
+
+Prefer: - The proposed system - This work - The platform - The
+implementation
+
+------------------------------------------------------------------------
+
+10. Common Mistakes to Avoid
+
+-   Copying text from papers.
+-   AI-generated repetitive wording.
+-   Unsupported claims.
+-   Missing citations.
+-   Inconsistent terminology.
+-   Overly long paragraphs.
+-   Poor figure quality.
+-   Grammatical errors.
+-   Placeholder text in final submission.
+-   Broken references.
+
+------------------------------------------------------------------------
+
+11. Plagiarism Checklist
+
+-   Write in your own words.
+-   Cite all borrowed ideas.
+-   Never copy abstracts.
+-   Rewrite literature summaries independently.
+-   Verify similarity using your institution’s approved checker if
+    available.
+
+------------------------------------------------------------------------
+
+12. Research Gap
+
+End the literature survey by explaining: - What existing work does
+well. - What limitations remain. - How your project addresses those
+limitations.
+
+------------------------------------------------------------------------
+
+13. Results Checklist
+
+Include: - Functional screenshots - Workflow validation - Security
+discussion - Performance comparison - Limitations
+
+Avoid inventing experimental data.
+
+------------------------------------------------------------------------
+
+14. Final Submission Checklist
+
+-   IEEE template used
+-   Grammar checked
+-   Spell checked
+-   References verified
+-   Figure numbers correct
+-   Table numbers correct
+-   Consistent terminology
+-   Abstract updated
+-   Conclusion reflects actual work
+-   PDF generated without formatting issues
+
+------------------------------------------------------------------------
+
+15. Our Workflow
+
+Current stage: - Title - Abstract (Draft) - Keywords - Introduction -
+Literature Survey
+
+Later: - Methodology - Architecture - Implementation - Results -
+Conclusion - Final proofreading
+
+This guide should remain the single reference document throughout the
+project.

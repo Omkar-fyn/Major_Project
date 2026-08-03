@@ -26,10 +26,11 @@
   text-decoration: none;
 }
 
-.logoIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.logoImg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .logoText {

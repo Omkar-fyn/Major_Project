@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import { assetAPI } from '@/lib/api';
 import styles from './page.module.css';
 
@@ -102,7 +102,7 @@ export default function AddAssetPage() {
 
                 <div className="form-group">
                   <label className="form-label">Description</label>
-                  <textarea name="description" className="form-input" placeholder="Detailed description of the property..." value={form.description} onChange={handleChange} required rows={5}/>
+                  <textarea name="description" className="form-input" placeholder="Detailed description of the property..." value={form.description} onChange={handleChange} required rows={5} />
                 </div>
 
                 <div className={styles.twoCol}>
@@ -148,18 +148,18 @@ export default function AddAssetPage() {
                       <img src={imagePreview} alt="Preview" className={styles.uploadPreview} />
                     ) : (
                       <div className={styles.uploadPlaceholder}>
-                        <span style={{fontSize: '2.5rem'}}>📷</span>
+                        <span style={{ fontSize: '2.5rem' }}>📷</span>
                         <p>Click to upload image</p>
                         <span className={styles.uploadHint}>JPEG, PNG, WebP (max 5MB)</span>
                       </div>
                     )}
-                    <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} style={{display: 'none'}} />
+                    <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
                   </div>
                 </div>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-gold btn-lg btn-full" disabled={loading || success} style={{marginTop: 'var(--space-xl)'}}>
+            <button type="submit" className="btn btn-gold btn-lg btn-full" disabled={loading || success} style={{ marginTop: 'var(--space-xl)' }}>
               {loading ? 'Creating...' : success ? 'Created ✓' : 'Create Asset'}
             </button>
           </form>

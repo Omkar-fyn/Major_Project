@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthProvider';
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 
@@ -14,17 +14,9 @@ export default function Navbar() {
     <nav className={styles.navbar}>
       <div className={styles.navInner}>
         <Link href="/" className={styles.logo}>
-          <div className={styles.logoIcon}>
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-              <rect x="1.5" y="1.5" width="23" height="23" rx="6" stroke="#387ed1" strokeWidth="2"/>
-              <path d="M8 13h10" stroke="#387ed1" strokeWidth="2" strokeLinecap="round"/>
-              <circle cx="9.5" cy="9" r="2" stroke="#0ab39c" strokeWidth="1.5"/>
-              <circle cx="16.5" cy="17" r="2" stroke="#0ab39c" strokeWidth="1.5"/>
-              <path d="M11 10l4 6" stroke="#387ed1" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
+          <img src="/logo.png" alt="Asset Tokenization" className={styles.logoImg} />
           <span className={styles.logoText}>
-            Asset<span className={styles.logoAccent}>-Tokenization</span>
+            Asset<span className={styles.logoAccent}> Tokenization</span>
           </span>
         </Link>
 
@@ -69,7 +61,7 @@ export default function Navbar() {
                       <p className={styles.dropdownName}>{user.name}</p>
                       <p className={styles.dropdownEmail}>{user.email}</p>
                     </div>
-                    <hr className={styles.dropdownDivider}/>
+                    <hr className={styles.dropdownDivider} />
                     <Link href="/dashboard" className={styles.dropdownItem} onClick={() => setMenuOpen(false)}>
                       📊 Dashboard
                     </Link>
@@ -82,10 +74,10 @@ export default function Navbar() {
             </>
           ) : (
             <div className={styles.authBtns}>
-              <Link href="/login" className="btn btn-secondary btn-sm" onClick={() => setMenuOpen(false)}>
+              <Link href="/auth/login" className="btn btn-secondary btn-sm" onClick={() => setMenuOpen(false)}>
                 Log In
               </Link>
-              <Link href="/signup" className="btn btn-primary btn-sm" onClick={() => setMenuOpen(false)}>
+              <Link href="/auth/signup" className="btn btn-primary btn-sm" onClick={() => setMenuOpen(false)}>
                 Sign Up
               </Link>
             </div>

@@ -84,6 +84,17 @@
   margin-bottom: var(--space-2xl);
 }
 
+/* Chart Section */
+.chartSection {
+  margin-bottom: var(--space-2xl);
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Tabs */
 .tabs {
   display: flex;

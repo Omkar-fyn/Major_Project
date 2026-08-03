@@ -1,0 +1,101 @@
+# MAJOR PROJECT CO-PO/PSO MAPPING
+
+For
+**“Asset Tokenization: Decentralized Platform for Real-World Asset Tokenization Using Blockchain”** 
+
+---
+
+# ✅ CO Statements
+
+| CO No | Course Outcome Statement                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------ |
+| CO1   | Apply knowledge of blockchain, web technologies, and databases to solve real-world asset management problems.      |
+| CO2   | Analyze traditional financial system limitations and propose decentralized tokenization solutions.                 |
+| CO3   | Design and develop a secure asset tokenization platform using smart contracts and full-stack technologies.         |
+| CO4   | Evaluate system performance, security, transparency, and scalability of blockchain-based asset management systems. |
+| CO5   | Develop a functional prototype with ethical considerations, transparency, and secure transaction handling.         |
+| CO6   | Work effectively as a team in planning, development, testing, and documentation of the project.                    |
+
+---
+
+# ✅ CO-PO/PSO Mapping Table
+
+### Mapping Scale:
+
+* **3 → High**
+* **2 → Medium**
+* **1 → Low**
+* **- → No Mapping**
+
+| COs / POs | PO1 | PO2 | PO3 | PO4 | PO5 | PO6 | PO7 | PO8 | PO9 | PO10 | PO11 | PSO1 | PSO2 |
+| --------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---- | ---- | ---- | ---- |
+| CO1       | 3   | 2   | -   | -   | 3   | -   | -   | -   | -   | -    | -    | 3    | 2    |
+| CO2       | 2   | 3   | 2   | 2   | -   | -   | -   | -   | -   | -    | -    | 2    | 3    |
+| CO3       | 2   | 2   | 3   | 2   | 3   | -   | -   | 1   | -   | -    | -    | 3    | 3    |
+| CO4       | 2   | 3   | 2   | 3   | 2   | -   | -   | 1   | -   | -    | -    | 2    | 3    |
+| CO5       | 2   | 2   | 3   | 2   | 3   | -   | -   | 3   | 1   | -    | -    | 3    | 2    |
+| CO6       | -   | -   | -   | -   | -   | -   | -   | 1   | 3   | 3    | 2    | -    | -    |
+
+---
+
+# ✅ Average Mapping
+
+| PO/PSO | Avg |
+| ------ | --- |
+| PO1    | 1.8 |
+| PO2    | 2.3 |
+| PO3    | 2.0 |
+| PO4    | 1.8 |
+| PO5    | 1.8 |
+| PO6    | -   |
+| PO7    | -   |
+| PO8    | 0.8 |
+| PO9    | 0.7 |
+| PO10   | 0.5 |
+| PO11   | 0.3 |
+| PSO1   | 2.1 |
+| PSO2   | 2.5 |
+
+---
+
+# ✅ Justification for CO-PO/PSO Mapping
+
+| CO  | PO/PSO               | Justification                                                                                                                         |
+| --- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| CO1 | PO1, PO5, PSO1       | Applies engineering knowledge, blockchain tools, MongoDB, React.js, and Ethereum technologies for solving asset management problems.  |
+| CO2 | PO2, PO4, PSO2       | Analyzes traditional system inefficiencies and evaluates blockchain-based decentralized solutions through research and investigation. |
+| CO3 | PO3, PO5, PSO1, PSO2 | Designs and develops a complete blockchain-based asset tokenization platform using modern software engineering practices.             |
+| CO4 | PO2, PO4, PSO2       | Evaluates security, transaction transparency, scalability, and system performance using blockchain architecture.                      |
+| CO5 | PO3, PO5, PO8, PSO1  | Develops a secure and ethical decentralized application ensuring transparency and proper handling of user transactions.               |
+| CO6 | PO9, PO10, PO11      | Demonstrates teamwork, communication, project coordination, and management during project development and documentation.              |
+
+---
+
+# ✅ Additional Improvement (Recommended for VTU)
+
+You can also add this below the table:
+
+### PO Legend
+
+| PO   | Description                       |
+| ---- | --------------------------------- |
+| PO1  | Engineering Knowledge             |
+| PO2  | Problem Analysis                  |
+| PO3  | Design/Development of Solutions   |
+| PO4  | Investigation of Complex Problems |
+| PO5  | Modern Tool Usage                 |
+| PO6  | Engineer and Society              |
+| PO7  | Environment and Sustainability    |
+| PO8  | Ethics                            |
+| PO9  | Individual and Team Work          |
+| PO10 | Communication                     |
+| PO11 | Project Management and Finance    |
+
+---
+
+This mapping is now:
+
+* ✅ Properly aligned with your blockchain project
+* ✅ Academically acceptable for VTU
+* ✅ Technically relevant
+* ✅ Consistent with your report content 
