@@ -117,7 +117,7 @@ export default function AssetDetailPage() {
 
       // 5. Explicitly sync with backend (primary path)
       try {
-        await transactionAPI.sync(id, tokenCount, receipt.hash, 'buy');
+        await transactionAPI.sync(id, tokenCount, dummyTx.hash, 'buy');
       } catch (syncErr) {
         console.error('Backend sync failed:', syncErr.message);
         throw new Error(`Transaction confirmed by MetaMask, but backend sync failed: ${syncErr.message}`);
