@@ -294,13 +294,18 @@ exports.syncBlockchainTx = async (req, res) => {
 
     let receipt;
     try {
-      receipt = await provider.getTransactionReceipt(txHash);
+      // Retry up to 5 times (RPC nodes often lag by a few seconds, Sepolia blocks take 12-15s)
+      for (let i = 0; i < 5; i++) {
+        receipt = await provider.getTransactionReceipt(txHash);
+        if (receipt) break;
+        await new Promise(r => setTimeout(r, 4000));
+      }
     } catch (err) {
       return res.status(400).json({ success: false, message: 'Invalid transaction hash format' });
     }
 
     if (!receipt) {
-      return res.status(400).json({ success: false, message: 'Transaction not found on the network' });
+      return res.status(400).json({ success: false, message: `Transaction not found on the network. Searched for hash: ${txHash}. Are you sure you are on Sepolia?` });
     }
 
     if (receipt.status !== 1) {

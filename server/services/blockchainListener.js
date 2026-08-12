@@ -17,8 +17,7 @@ let ammContract;
 
 async function startBlockchainListener() {
   try {
-    // For local hardhat, we use HTTP since WS might not be exposed by default, but we can poll using JsonRpcProvider
-    provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
+    provider = new ethers.JsonRpcProvider(rpcUrl);
     
     // Test connection
     const network = await provider.getNetwork();
@@ -136,11 +135,11 @@ async function startBlockchainListener() {
 // Function to check if local hardhat node wiped and clear DB if necessary
 async function checkAndSyncLocalNetworkWipe() {
   try {
-    const checkProvider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
+    const checkProvider = new ethers.JsonRpcProvider(rpcUrl);
     // Check if the contract is deployed at AMM_ADDRESS
     const code = await checkProvider.getCode(AMM_ADDRESS);
     
-    if (code === '0x') {
+    if (code === '0x' && rpcUrl.includes('127.0.0.1')) {
       console.log(`⚠️ [NETWORK DETECT] AMM Contract not found at ${AMM_ADDRESS}!`);
       console.log(`⚠️ This usually means the local Hardhat node was restarted.`);
       console.log(`🔄 Automatically wiping local database transactions and ownerships to stay in sync...`);
