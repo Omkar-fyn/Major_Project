@@ -11,6 +11,15 @@ contract BondingCurveAMM is ReentrancyGuard, Ownable {
     uint256 public reserveETH;
     uint256 public reserveToken;
 
+    error InvalidAmounts();
+    error TokenTransferFailed();
+    error InvalidReserves();
+    error MustSendETH();
+    error MustSendTokens();
+    error InsufficientOutputAmount();
+    error InsufficientLiquidity();
+    error ETHTransferFailed();
+
     event LiquidityAdded(address indexed provider, uint256 ethAmount, uint256 tokenAmount);
     event TokensSwapped(address indexed user, uint256 ethIn, uint256 tokenIn, uint256 ethOut, uint256 tokenOut);
 
@@ -20,9 +29,9 @@ contract BondingCurveAMM is ReentrancyGuard, Ownable {
 
     // Add initial liquidity to establish the curve (Constant Product x * y = k)
     function addLiquidity(uint256 tokenAmount) external payable onlyOwner nonReentrant {
-        require(msg.value > 0 && tokenAmount > 0, "Amounts must be > 0");
+        if (msg.value == 0 || tokenAmount == 0) revert InvalidAmounts();
         
-        require(propertyToken.transferFrom(msg.sender, address(this), tokenAmount), "Token transfer failed");
+        if (!propertyToken.transferFrom(msg.sender, address(this), tokenAmount)) revert TokenTransferFailed();
 
         reserveETH += msg.value;
         reserveToken += tokenAmount;
@@ -33,7 +42,7 @@ contract BondingCurveAMM is ReentrancyGuard, Ownable {
     // Get the price based on x * y = k formula
     // outputAmount = (outputReserve * inputAmount) / (inputReserve + inputAmount)
     function getAmountOut(uint256 inputAmount, uint256 inputReserve, uint256 outputReserve) public pure returns (uint256) {
-        require(inputReserve > 0 && outputReserve > 0, "Invalid reserves");
+        if (inputReserve == 0 || outputReserve == 0) revert InvalidReserves();
         uint256 inputAmountWithFee = inputAmount * 997; // 0.3% fee
         uint256 numerator = inputAmountWithFee * outputReserve;
         uint256 denominator = (inputReserve * 1000) + inputAmountWithFee;
@@ -42,35 +51,35 @@ contract BondingCurveAMM is ReentrancyGuard, Ownable {
 
     // Buy tokens with ETH
     function buyTokens() external payable nonReentrant {
-        require(msg.value > 0, "Must send ETH");
+        if (msg.value == 0) revert MustSendETH();
         
         uint256 tokensToReceive = getAmountOut(msg.value, reserveETH, reserveToken);
-        require(tokensToReceive > 0, "Insufficient output amount");
-        require(reserveToken >= tokensToReceive, "Insufficient liquidity");
+        if (tokensToReceive == 0) revert InsufficientOutputAmount();
+        if (reserveToken < tokensToReceive) revert InsufficientLiquidity();
 
         reserveETH += msg.value;
         reserveToken -= tokensToReceive;
 
-        require(propertyToken.transfer(msg.sender, tokensToReceive), "Token transfer failed");
+        if (!propertyToken.transfer(msg.sender, tokensToReceive)) revert TokenTransferFailed();
 
         emit TokensSwapped(msg.sender, msg.value, 0, 0, tokensToReceive);
     }
 
     // Sell tokens for ETH
     function sellTokens(uint256 tokenAmount) external nonReentrant {
-        require(tokenAmount > 0, "Must send tokens");
+        if (tokenAmount == 0) revert MustSendTokens();
 
         uint256 ethToReceive = getAmountOut(tokenAmount, reserveToken, reserveETH);
-        require(ethToReceive > 0, "Insufficient output amount");
-        require(reserveETH >= ethToReceive, "Insufficient liquidity");
+        if (ethToReceive == 0) revert InsufficientOutputAmount();
+        if (reserveETH < ethToReceive) revert InsufficientLiquidity();
 
-        require(propertyToken.transferFrom(msg.sender, address(this), tokenAmount), "Token transfer failed");
+        if (!propertyToken.transferFrom(msg.sender, address(this), tokenAmount)) revert TokenTransferFailed();
 
         reserveToken += tokenAmount;
         reserveETH -= ethToReceive;
 
         (bool success, ) = payable(msg.sender).call{value: ethToReceive}("");
-        require(success, "ETH transfer failed");
+        if (!success) revert ETHTransferFailed();
 
         emit TokensSwapped(msg.sender, 0, tokenAmount, ethToReceive, 0);
     }

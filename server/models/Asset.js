@@ -97,4 +97,20 @@ assetSchema.pre('save', function (next) {
   next();
 });
 
+// Dynamic AMM Price Calculation
+assetSchema.methods.getCurrentPrice = function() {
+  if (!this.availableTokens || this.availableTokens === 0) return this.pricePerToken * 5; 
+  
+  const initialY = this.totalTokens;
+  const initialX = this.totalTokens * this.pricePerToken;
+  const k = initialX * initialY;
+  
+  const currentY = this.availableTokens;
+  const currentX = k / currentY;
+  
+  const currentPrice = currentX / currentY;
+  return Math.round(currentPrice * 100) / 100;
+};
+
+
 module.exports = mongoose.model('Asset', assetSchema);

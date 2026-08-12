@@ -30,11 +30,98 @@
   display: flex;
   gap: 2px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 3px;
-  margin-bottom: var(--space-xl);
-  max-width: fit-content;
+  border-bottom: 2px solid var(--accent-gold);
+}
+
+/* Blockchain Panel Styles */
+.blockchainPanel {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+.blockchainHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.networkStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  color: #d1d4dc;
+  background-color: rgba(255,255,255,0.05);
+  padding: 6px 16px;
+  border-radius: 20px;
+}
+
+.statusDotGreen {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent-green);
+  box-shadow: 0 0 10px var(--accent-green);
+  animation: pulse 2s infinite;
+}
+
+.statusDotRed {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent-red);
+  box-shadow: 0 0 10px var(--accent-red);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.blockchainGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.bcCard {
+  background-color: rgba(10, 15, 30, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.bcLabel {
+  font-size: 0.85rem;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+}
+
+.bcValueMono {
+  font-size: 1.5rem;
+  font-family: var(--font-mono);
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(255,255,255,0.2);
+}
+
+.hashText {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  background: rgba(255, 215, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .tab {

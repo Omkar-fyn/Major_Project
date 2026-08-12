@@ -34,4 +34,14 @@ contract PropertyToken is ERC20, Ownable {
         // Distribute proportionally to all holders
         emit RentalDistributed(msg.sender, msg.value);
     }
+
+    // Dynamic generation of tokens for platform buys
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, amount);
+    }
+
+    // Dynamic destruction of tokens for platform sells
+    function burn(address from, uint256 amount) external onlyOwner {
+        _burn(from, amount);
+    }
 }

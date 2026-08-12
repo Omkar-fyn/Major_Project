@@ -5,45 +5,58 @@ const Ownership = require('../models/Ownership');
 // Key: assetId, Value: { prices: [], timestamps: [], lastUpdate: Date }
 const priceCache = {};
 
-/**
- * Generate simulated price variation from base price.
- * Applies ±2% to ±5% random fluctuation.
- */
-function simulatePrice(basePrice) {
-  const variationPercent = (Math.random() * 6 - 3) / 100; // -3% to +3%
-  const trendBias = (Math.random() - 0.48) * 0.02; // slight upward bias
-  return Math.round(basePrice * (1 + variationPercent + trendBias) * 100) / 100;
+function getAMMPrice(asset) {
+  // Constant Product Formula: x * y = k
+  if (!asset.availableTokens || asset.availableTokens === 0) return asset.pricePerToken * 5; // Arbitrary cap
+  
+  const initialY = asset.totalTokens;
+  const initialX = asset.totalTokens * asset.pricePerToken;
+  const k = initialX * initialY;
+  
+  const currentY = asset.availableTokens;
+  const currentX = k / currentY;
+  
+  // price = x / y
+  const currentPrice = currentX / currentY;
+  return Math.round(currentPrice * 100) / 100;
 }
 
 /**
- * Get or create price history for an asset.
- * Maintains a sliding window of 20 data points.
+ * Generate simulated price variation around a base price.
+ * Applies ±1% random fluctuation for visual charting.
  */
-function getOrCreatePriceHistory(assetId, basePrice) {
+function simulatePrice(basePrice) {
+  const variationPercent = (Math.random() * 2 - 1) / 100; 
+  return Math.round(basePrice * (1 + variationPercent) * 100) / 100;
+}
+
+/**
+ * Get or create price history for an asset using AMM logic.
+ */
+function getOrCreatePriceHistory(asset) {
   const now = Date.now();
+  const assetId = asset._id.toString();
+  const ammPrice = getAMMPrice(asset);
   
   if (!priceCache[assetId]) {
-    // Initialize with 20 historical data points (simulated past)
     const prices = [];
     const timestamps = [];
-    for (let i = 19; i >= 0; i--) {
-      prices.push(simulatePrice(basePrice));
+    // Generate 100 historical data points for a dense, real-looking chart
+    for (let i = 99; i >= 0; i--) {
+      prices.push(simulatePrice(ammPrice));
       timestamps.push(new Date(now - i * 3000).toISOString());
     }
-    priceCache[assetId] = { prices, timestamps, lastUpdate: now, basePrice };
+    priceCache[assetId] = { prices, timestamps, lastUpdate: now, basePrice: ammPrice };
   }
   
   const cache = priceCache[assetId];
+  cache.basePrice = ammPrice;
   
-  // Update base price if it changed (token was bought/sold)
-  cache.basePrice = basePrice;
-  
-  // Add new data points for elapsed time since last update
   const elapsed = now - cache.lastUpdate;
-  const newPoints = Math.min(Math.floor(elapsed / 3000), 5); // max 5 new points per request
+  const newPoints = Math.min(Math.floor(elapsed / 3000), 5);
   
   for (let i = 0; i < newPoints; i++) {
-    cache.prices.push(simulatePrice(basePrice));
+    cache.prices.push(simulatePrice(ammPrice));
     cache.timestamps.push(new Date(now - (newPoints - 1 - i) * 3000).toISOString());
   }
   
@@ -51,10 +64,9 @@ function getOrCreatePriceHistory(assetId, basePrice) {
     cache.lastUpdate = now;
   }
   
-  // Keep only last 20 data points (sliding window)
-  if (cache.prices.length > 20) {
-    cache.prices = cache.prices.slice(-20);
-    cache.timestamps = cache.timestamps.slice(-20);
+  if (cache.prices.length > 100) {
+    cache.prices = cache.prices.slice(-100);
+    cache.timestamps = cache.timestamps.slice(-100);
   }
   
   return cache;
@@ -83,7 +95,13 @@ exports.getAssets = async (req, res) => {
 
     const assets = await Asset.find(query).sort(sortOption);
 
-    res.json({ success: true, count: assets.length, assets });
+    const formattedAssets = assets.map(a => {
+      const doc = a.toObject();
+      doc.pricePerToken = a.getCurrentPrice();
+      return doc;
+    });
+
+    res.json({ success: true, count: formattedAssets.length, assets: formattedAssets });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -106,9 +124,12 @@ exports.getAsset = async (req, res) => {
 
     const totalOwnedTokens = asset.totalTokens - asset.availableTokens;
 
+    const doc = asset.toObject();
+    doc.pricePerToken = asset.getCurrentPrice();
+
     res.json({
       success: true,
-      asset,
+      asset: doc,
       ownership: {
         totalOwners: owners.length,
         totalOwnedTokens,
@@ -135,7 +156,7 @@ exports.getAssetChartData = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Asset not found' });
     }
 
-    const history = getOrCreatePriceHistory(req.params.id, asset.pricePerToken);
+    const history = getOrCreatePriceHistory(asset);
 
     res.json({
       success: true,
@@ -146,7 +167,7 @@ exports.getAssetChartData = async (req, res) => {
         sold: asset.totalTokens - asset.availableTokens,
         available: asset.availableTokens
       },
-      basePrice: asset.pricePerToken
+      basePrice: history.basePrice
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

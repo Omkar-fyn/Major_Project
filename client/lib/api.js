@@ -64,6 +64,7 @@ export const authAPI = {
   login: (email, password) => apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   signup: (name, email, password) => apiFetch('/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
   getMe: () => apiFetch('/auth/me'),
+  linkWallet: (walletAddress) => apiFetch('/auth/link-wallet', { method: 'POST', body: JSON.stringify({ walletAddress }) }),
 };
 
 // Assets
@@ -88,4 +89,5 @@ export const adminAPI = {
   getUsers: () => apiFetch('/admin/users'),
   getTransactions: () => apiFetch('/admin/transactions'),
   getStats: () => apiFetch('/admin/stats'),
+  getBlockchainStats: () => apiFetch('/admin/blockchain'),
 };

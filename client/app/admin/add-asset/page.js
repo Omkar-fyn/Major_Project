@@ -17,7 +17,7 @@ export default function AddAssetPage() {
   const [form, setForm] = useState({
     name: '',
     description: '',
-    category: 'real-estate',
+    category: 'commercial',
     totalValue: '',
     totalTokens: '',
     location: '',
@@ -60,6 +60,10 @@ export default function AddAssetPage() {
           formData.append(key, form[key]);
         }
       });
+      // Backend requires propertyAddress, so use the location field for it
+      if (form.location) {
+        formData.append('propertyAddress', form.location);
+      }
 
       await assetAPI.create(formData);
       setSuccess(true);
@@ -109,7 +113,7 @@ export default function AddAssetPage() {
                   <div className="form-group">
                     <label className="form-label">Category</label>
                     <div className={styles.computedField}>🏢 Real Estate</div>
-                    <input type="hidden" name="category" value="real-estate" />
+                    <input type="hidden" name="category" value="commercial" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Location</label>

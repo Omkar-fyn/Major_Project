@@ -3,7 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const connectDB = require('./config/db');
-
+const { startBlockchainListener, checkAndSyncLocalNetworkWipe } = require('./services/blockchainListener');
 // Connect to database
 connectDB();
 
@@ -25,6 +25,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/assets', require('./routes/assets'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/faucet', require('./routes/faucet'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -34,12 +35,16 @@ app.get('/api/health', (req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ success: false, message: 'Server Error' });
+  res.status(500).json({ success: false, message: err.message || 'Server Error' });
 });
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 API: http://localhost:${PORT}/api`);
+  
+  // Sync Architecture: Start blockchain listeners and perform health check
+  await checkAndSyncLocalNetworkWipe();
+  startBlockchainListener();
 });

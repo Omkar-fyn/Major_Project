@@ -18,7 +18,12 @@ const transactionSchema = new mongoose.Schema({
   },
   tokensBought: {
     type: Number,
-    required: true,
+    required: false,
+    min: 1
+  },
+  tokensSold: {
+    type: Number,
+    required: false,
     min: 1
   },
   pricePerToken: {

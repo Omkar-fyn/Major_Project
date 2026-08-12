@@ -9,19 +9,22 @@ contract OrderBookMarketplace is ReentrancyGuard {
 
     struct Order {
         uint256 id;
-        address user;
         uint256 amount;
         uint256 price; // Price per token in wei
+        address user;
         bool isBuyOrder;
         bool isActive;
     }
 
     uint256 public nextOrderId;
     mapping(uint256 => Order) public orders;
-    
-    // Arrays to keep track of active orders (for easier frontend fetching)
-    uint256[] public activeBuyOrders;
-    uint256[] public activeSellOrders;
+
+    error IncorrectETHSent();
+    error TokenTransferFailed();
+    error OrderNotActive();
+    error NotOrderOwner();
+    error ETHTransferFailed();
+    error InvalidAmountToFill();
 
     event OrderPlaced(uint256 indexed orderId, address indexed user, uint256 amount, uint256 price, bool isBuyOrder);
     event OrderFilled(uint256 indexed orderId, address indexed filler, uint256 amountFilled, uint256 totalPrice);
@@ -34,54 +37,52 @@ contract OrderBookMarketplace is ReentrancyGuard {
     // Place a limit buy order (Deposit ETH)
     function placeBuyOrder(uint256 amount, uint256 price) external payable nonReentrant {
         uint256 totalCost = amount * price;
-        require(msg.value == totalCost, "Incorrect ETH sent");
+        if (msg.value != totalCost) revert IncorrectETHSent();
 
         uint256 orderId = nextOrderId++;
         orders[orderId] = Order({
             id: orderId,
-            user: msg.sender,
             amount: amount,
             price: price,
+            user: msg.sender,
             isBuyOrder: true,
             isActive: true
         });
 
-        activeBuyOrders.push(orderId);
         emit OrderPlaced(orderId, msg.sender, amount, price, true);
     }
 
     // Place a limit sell order (Deposit Tokens)
     function placeSellOrder(uint256 amount, uint256 price) external nonReentrant {
-        require(propertyToken.transferFrom(msg.sender, address(this), amount), "Token transfer failed");
+        if (!propertyToken.transferFrom(msg.sender, address(this), amount)) revert TokenTransferFailed();
 
         uint256 orderId = nextOrderId++;
         orders[orderId] = Order({
             id: orderId,
-            user: msg.sender,
             amount: amount,
             price: price,
+            user: msg.sender,
             isBuyOrder: false,
             isActive: true
         });
 
-        activeSellOrders.push(orderId);
         emit OrderPlaced(orderId, msg.sender, amount, price, false);
     }
 
     // Cancel an order
     function cancelOrder(uint256 orderId) external nonReentrant {
         Order storage order = orders[orderId];
-        require(order.isActive, "Order not active");
-        require(order.user == msg.sender, "Not order owner");
+        if (!order.isActive) revert OrderNotActive();
+        if (order.user != msg.sender) revert NotOrderOwner();
 
         order.isActive = false;
 
         if (order.isBuyOrder) {
             uint256 refundEth = order.amount * order.price;
             (bool success, ) = payable(msg.sender).call{value: refundEth}("");
-            require(success, "ETH transfer failed");
+            if (!success) revert ETHTransferFailed();
         } else {
-            require(propertyToken.transfer(msg.sender, order.amount), "Token transfer failed");
+            if (!propertyToken.transfer(msg.sender, order.amount)) revert TokenTransferFailed();
         }
 
         emit OrderCancelled(orderId, msg.sender);
@@ -90,26 +91,26 @@ contract OrderBookMarketplace is ReentrancyGuard {
     // Fill an open order
     function fillOrder(uint256 orderId, uint256 amountToFill) external payable nonReentrant {
         Order storage order = orders[orderId];
-        require(order.isActive, "Order not active");
-        require(amountToFill > 0 && amountToFill <= order.amount, "Invalid amount to fill");
+        if (!order.isActive) revert OrderNotActive();
+        if (amountToFill == 0 || amountToFill > order.amount) revert InvalidAmountToFill();
 
         if (order.isBuyOrder) {
             // User is taking a BUY order (they are selling tokens to the order creator)
-            require(propertyToken.transferFrom(msg.sender, order.user, amountToFill), "Token transfer failed");
+            if (!propertyToken.transferFrom(msg.sender, order.user, amountToFill)) revert TokenTransferFailed();
             
             uint256 ethToReceive = amountToFill * order.price;
             (bool success, ) = payable(msg.sender).call{value: ethToReceive}("");
-            require(success, "ETH transfer failed");
+            if (!success) revert ETHTransferFailed();
 
         } else {
             // User is taking a SELL order (they are buying tokens from the order creator)
             uint256 ethCost = amountToFill * order.price;
-            require(msg.value == ethCost, "Incorrect ETH sent");
+            if (msg.value != ethCost) revert IncorrectETHSent();
 
-            require(propertyToken.transfer(msg.sender, amountToFill), "Token transfer failed");
+            if (!propertyToken.transfer(msg.sender, amountToFill)) revert TokenTransferFailed();
             
             (bool success, ) = payable(order.user).call{value: ethCost}("");
-            require(success, "ETH transfer failed");
+            if (!success) revert ETHTransferFailed();
         }
 
         order.amount -= amountToFill;

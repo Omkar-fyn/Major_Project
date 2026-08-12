@@ -98,3 +98,46 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Link MetaMask wallet address to user account
+// @route   POST /api/auth/link-wallet
+exports.linkWallet = async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+    if (!walletAddress) {
+      return res.status(400).json({ success: false, message: 'walletAddress is required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Check if another user already has this wallet address (case-insensitive)
+    const existing = await User.findOne({
+      walletId: { $regex: new RegExp(`^${walletAddress}$`, 'i') },
+      _id: { $ne: user._id }
+    });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'This wallet is already linked to another account' });
+    }
+
+    user.walletId = walletAddress;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Wallet linked successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        walletId: user.walletId,
+        walletBalance: user.walletBalance
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

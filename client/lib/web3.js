@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
-export const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS || "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"; // Default hardhat address
-export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS || "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"; // Default hardhat address
+export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
 
 export const AMM_ABI = [
   "function buyTokens() external payable",
@@ -17,6 +17,39 @@ export const TOKEN_ABI = [
 export async function getWeb3Provider() {
   if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
     const provider = new ethers.BrowserProvider(window.ethereum);
+    
+    // Auto-switch to Localhost 8545
+    const chainId = '0x7a69'; // 31337 in hex
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: chainId }],
+      });
+    } catch (switchError) {
+      // This error code indicates that the chain has not been added to MetaMask.
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: chainId,
+                chainName: 'Hardhat Localhost',
+                rpcUrls: ['http://127.0.0.1:8545'],
+                nativeCurrency: {
+                  name: 'Ethereum',
+                  symbol: 'ETH',
+                  decimals: 18,
+                },
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error("Failed to add Hardhat network to MetaMask", addError);
+        }
+      }
+    }
+
     return provider;
   }
   throw new Error("MetaMask is not installed");

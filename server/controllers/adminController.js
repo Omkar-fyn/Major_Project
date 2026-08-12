@@ -2,6 +2,11 @@ const User = require('../models/User');
 const Asset = require('../models/Asset');
 const Transaction = require('../models/Transaction');
 const Ownership = require('../models/Ownership');
+const { ethers } = require('ethers');
+
+// Ensure correct contract addresses for proxying
+const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
 
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users
@@ -33,7 +38,7 @@ exports.getAllTransactions = async (req, res) => {
 // @route   GET /api/admin/stats
 exports.getStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments({ role: 'user' });
+    const totalUsers = await User.countDocuments();
     const totalAssets = await Asset.countDocuments();
     const activeAssets = await Asset.countDocuments({ status: 'active' });
     const totalTransactions = await Transaction.countDocuments();
@@ -60,6 +65,41 @@ exports.getStats = async (req, res) => {
         totalTransactions,
         totalVolume,
         recentTransactions
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get live blockchain stats (admin proxy)
+// @route   GET /api/admin/blockchain
+exports.getBlockchainStats = async (req, res) => {
+  try {
+    const rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545';
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    
+    const blockNumber = await provider.getBlockNumber();
+    
+    const tokenContract = new ethers.Contract(TOKEN_ADDRESS, ['function totalSupply() view returns(uint256)'], provider);
+    const ammContract = new ethers.Contract(AMM_ADDRESS, ['function reserveETH() view returns(uint256)', 'function reserveToken() view returns(uint256)'], provider);
+    
+    const totalSupply = await tokenContract.totalSupply();
+    const reserveETH = await ammContract.reserveETH();
+    const reserveToken = await ammContract.reserveToken();
+    
+    // Total supply minus what is locked in the AMM gives us the exact amount minted/bought by users
+    const userTokensMinted = totalSupply - reserveToken;
+
+    res.json({
+      success: true,
+      blockchain: {
+        blockNumber,
+        totalSupply: ethers.formatEther(totalSupply),
+        userTokensMinted: ethers.formatEther(userTokensMinted),
+        ammEth: ethers.formatEther(reserveETH),
+        ammTokens: ethers.formatEther(reserveToken),
+        status: 'Connected (Proxy via Node.js)'
       }
     });
   } catch (error) {

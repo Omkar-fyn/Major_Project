@@ -3,7 +3,22 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Ownership = require('../models/Ownership');
 const { v4: uuidv4 } = require('uuid');
+const { ethers } = require('ethers');
 
+// Helper to get blockchain contract
+const getBlockchainContract = () => {
+  const rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545';
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  // Default hardhat account #0 private key for prototype
+  const PRIVATE_KEY = process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+  const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
+  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  return new ethers.Contract(
+    TOKEN_ADDRESS,
+    ['function mint(address to, uint256 amount) external', 'function burn(address from, uint256 amount) external'],
+    wallet
+  );
+};
 // @desc    Buy tokens
 // @route   POST /api/transactions/buy
 exports.buyTokens = async (req, res) => {
@@ -32,7 +47,8 @@ exports.buyTokens = async (req, res) => {
       });
     }
 
-    const totalCost = tokenCount * asset.pricePerToken;
+    const dynamicPrice = asset.getCurrentPrice();
+    const totalCost = tokenCount * dynamicPrice;
 
     // Check user balance
     const user = await User.findById(userId);
@@ -71,8 +87,18 @@ exports.buyTokens = async (req, res) => {
     }
     await ownership.save();
 
-    // Simulate blockchain tx hash
-    const simulatedTxHash = `0x${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').substring(0, 32)}`;
+    // Execute actual blockchain mint transaction
+    let actualTxHash;
+    try {
+      const tokenContract = getBlockchainContract();
+      // Mint tokens to the user's walletId
+      const tx = await tokenContract.mint(user.walletId, ethers.parseEther(tokenCount.toString()));
+      await tx.wait(); // Wait for confirmation
+      actualTxHash = tx.hash;
+    } catch (blockchainError) {
+      console.error("Blockchain mint failed:", blockchainError);
+      return res.status(500).json({ success: false, message: 'Blockchain transaction failed' });
+    }
 
     // Create transaction record
     const transaction = await Transaction.create({
@@ -80,9 +106,9 @@ exports.buyTokens = async (req, res) => {
       asset: assetId,
       type: 'buy',
       tokensBought: tokenCount,
-      pricePerToken: asset.pricePerToken,
+      pricePerToken: dynamicPrice,
       totalCost,
-      blockchainTxHash: simulatedTxHash,
+      blockchainTxHash: actualTxHash,
       status: 'completed'
     });
 
@@ -93,9 +119,9 @@ exports.buyTokens = async (req, res) => {
         id: transaction._id,
         assetName: asset.name,
         tokensBought: tokenCount,
-        pricePerToken: asset.pricePerToken,
+        pricePerToken: dynamicPrice,
         totalCost,
-        txHash: simulatedTxHash,
+        txHash: actualTxHash,
         newBalance: user.walletBalance,
         tokensOwned: ownership.tokensOwned
       }
@@ -131,7 +157,8 @@ exports.sellTokens = async (req, res) => {
       });
     }
 
-    const totalValue = tokenCount * asset.pricePerToken;
+    const dynamicPrice = asset.getCurrentPrice();
+    const totalValue = tokenCount * dynamicPrice;
 
     // Credit user balance
     const user = await User.findById(userId);
@@ -157,18 +184,28 @@ exports.sellTokens = async (req, res) => {
       await ownership.save();
     }
 
-    // Simulate blockchain tx hash
-    const simulatedTxHash = `0x${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').substring(0, 32)}`;
+    // Execute actual blockchain burn transaction
+    let actualTxHash;
+    try {
+      const tokenContract = getBlockchainContract();
+      // Burn tokens from the user's walletId
+      const tx = await tokenContract.burn(user.walletId, ethers.parseEther(tokenCount.toString()));
+      await tx.wait(); // Wait for confirmation
+      actualTxHash = tx.hash;
+    } catch (blockchainError) {
+      console.error("Blockchain burn failed:", blockchainError);
+      return res.status(500).json({ success: false, message: 'Blockchain transaction failed' });
+    }
 
     // Create transaction record
     const transaction = await Transaction.create({
       user: userId,
       asset: assetId,
       type: 'sell',
-      tokensBought: tokenCount,
-      pricePerToken: asset.pricePerToken,
+      tokensSold: tokenCount,
+      pricePerToken: dynamicPrice,
       totalCost: totalValue,
-      blockchainTxHash: simulatedTxHash,
+      blockchainTxHash: actualTxHash,
       status: 'completed'
     });
 
@@ -179,9 +216,9 @@ exports.sellTokens = async (req, res) => {
         id: transaction._id,
         assetName: asset.name,
         tokensSold: tokenCount,
-        pricePerToken: asset.pricePerToken,
+        pricePerToken: dynamicPrice,
         totalValue,
-        txHash: simulatedTxHash,
+        txHash: actualTxHash,
         newBalance: user.walletBalance,
         tokensOwned: ownership.tokensOwned
       }
@@ -241,6 +278,7 @@ exports.getPortfolio = async (req, res) => {
 
 // @desc    Sync a real blockchain transaction
 // @route   POST /api/transactions/sync
+
 exports.syncBlockchainTx = async (req, res) => {
   try {
     const { assetId, tokenCount, txHash, type } = req.body;
@@ -250,18 +288,47 @@ exports.syncBlockchainTx = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid request data' });
     }
 
+    // Verify transaction exists and is successful on the blockchain
+    const rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545'; // fallback to local hardhat
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+    let receipt;
+    try {
+      receipt = await provider.getTransactionReceipt(txHash);
+    } catch (err) {
+      return res.status(400).json({ success: false, message: 'Invalid transaction hash format' });
+    }
+
+    if (!receipt) {
+      return res.status(400).json({ success: false, message: 'Transaction not found on the network' });
+    }
+
+    if (receipt.status !== 1) {
+      return res.status(400).json({ success: false, message: 'Transaction failed on the network' });
+    }
+
+    // Check if we already synced this txHash — return success (not error) for idempotency
+    const existingTx = await Transaction.findOne({ blockchainTxHash: txHash });
+    if (existingTx) {
+      return res.json({ success: true, message: 'Transaction already synced', transaction: existingTx });
+    }
+
     const asset = await Asset.findById(assetId);
     if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
 
-    const totalValue = tokenCount * asset.pricePerToken;
+    const dynamicPrice = asset.getCurrentPrice();
+    const totalValue = tokenCount * dynamicPrice;
     const user = await User.findById(userId);
 
     let ownership = await Ownership.findOne({ user: userId, asset: assetId });
 
     if (type === 'buy') {
+      // Deduct balance
+      user.walletBalance -= totalValue;
+
       asset.availableTokens -= tokenCount;
       if (asset.availableTokens <= 0) asset.status = 'sold-out';
-      
+
       if (ownership) {
         ownership.tokensOwned += tokenCount;
         ownership.totalInvested += totalValue;
@@ -275,6 +342,13 @@ exports.syncBlockchainTx = async (req, res) => {
         });
       }
     } else if (type === 'sell') {
+      if (!ownership || ownership.tokensOwned < tokenCount) {
+        return res.status(400).json({ success: false, message: 'Insufficient tokens in portfolio to sell' });
+      }
+
+      // Credit balance
+      user.walletBalance += totalValue;
+
       asset.availableTokens += tokenCount;
       if (asset.status === 'sold-out' && asset.availableTokens > 0) asset.status = 'active';
 
@@ -284,6 +358,8 @@ exports.syncBlockchainTx = async (req, res) => {
         if (ownership.totalInvested < 0) ownership.totalInvested = 0;
       }
     }
+
+    await user.save();
 
     if (ownership) {
       ownership.percentageOwned = ((ownership.tokensOwned / asset.totalTokens) * 100);
@@ -301,8 +377,9 @@ exports.syncBlockchainTx = async (req, res) => {
       user: userId,
       asset: assetId,
       type: type,
-      tokensBought: tokenCount,
-      pricePerToken: asset.pricePerToken,
+      tokensBought: type === 'buy' ? tokenCount : undefined,
+      tokensSold: type === 'sell' ? tokenCount : undefined,
+      pricePerToken: dynamicPrice,
       totalCost: totalValue,
       blockchainTxHash: txHash,
       status: 'completed'
