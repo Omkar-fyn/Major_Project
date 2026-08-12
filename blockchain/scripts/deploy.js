@@ -4,17 +4,30 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log("Deploying contracts with account:", deployer.address);
 
-  // 1 & 2. Use Already Deployed Contracts to save gas!
-  const tokenAddress = "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
-  const ammAddress = "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
-  
-  const propertyToken = await hre.ethers.getContractAt("PropertyToken", tokenAddress);
-  const amm = await hre.ethers.getContractAt("BondingCurveAMM", ammAddress);
-  
-  console.log("Using deployed PropertyToken at:", tokenAddress);
-  console.log("Using deployed BondingCurveAMM at:", ammAddress);
+  // 1. Deploy PropertyToken
+  console.log("Deploying PropertyToken...");
+  const PropertyToken = await hre.ethers.getContractFactory("PropertyToken");
+  const propertyToken = await PropertyToken.deploy(
+    "Major Property Token", 
+    "MPT", 
+    hre.ethers.parseEther("1000000"), // Total Supply
+    hre.ethers.parseEther("0.001"),   // Price per token
+    "123 Main St, Mumbai, India"      // Property Address
+  );
+  await propertyToken.waitForDeployment();
+  const tokenAddress = await propertyToken.getAddress();
+  console.log("PropertyToken deployed to:", tokenAddress);
+
+  // 2. Deploy BondingCurveAMM
+  console.log("Deploying BondingCurveAMM...");
+  const BondingCurveAMM = await hre.ethers.getContractFactory("BondingCurveAMM");
+  const amm = await BondingCurveAMM.deploy(tokenAddress);
+  await amm.waitForDeployment();
+  const ammAddress = await amm.getAddress();
+  console.log("BondingCurveAMM deployed to:", ammAddress);
 
   // 3. Deploy OrderBookMarketplace
+  console.log("Deploying OrderBookMarketplace...");
   const OrderBookMarketplace = await hre.ethers.getContractFactory("OrderBookMarketplace");
   const marketplace = await OrderBookMarketplace.deploy(tokenAddress);
   await marketplace.waitForDeployment();
@@ -26,9 +39,15 @@ async function main() {
   await propertyToken.approve(ammAddress, hre.ethers.parseEther("1000"));
   
   console.log("Adding liquidity to AMM...");
-  // Changed from 10 ETH to 0.01 ETH because of faucet limits!
   await amm.addLiquidity(hre.ethers.parseEther("1000"), { value: hre.ethers.parseEther("0.01") });
-  console.log("Liquidity added: 1000 MPT & 0.01 MATIC");
+  console.log("Liquidity added: 1000 MPT & 0.01 ETH");
+  
+  console.log("\n=================================");
+  console.log("Deployment Complete!");
+  console.log(`NEXT_PUBLIC_TOKEN_ADDRESS=${tokenAddress}`);
+  console.log(`NEXT_PUBLIC_AMM_ADDRESS=${ammAddress}`);
+  console.log(`NEXT_PUBLIC_MARKETPLACE_ADDRESS=${marketplaceAddress}`);
+  console.log("=================================\n");
 }
 
 main().catch((error) => {

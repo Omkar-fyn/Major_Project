@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
-export const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa"; // Default hardhat address
-export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
+export const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS || "0x6EAaa5074500BFC72D1b488a83eF393f31d3d02B";
+export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
 
 export const AMM_ABI = [
   "function buyTokens() external payable",
@@ -18,8 +18,8 @@ export async function getWeb3Provider() {
   if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
     const provider = new ethers.BrowserProvider(window.ethereum);
     
-    // Auto-switch to Localhost 8545
-    const chainId = '0x7a69'; // 31337 in hex
+    // Auto-switch to Sepolia Testnet
+    const chainId = '0xaa36a7'; // Sepolia chain ID in hex
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
@@ -34,18 +34,19 @@ export async function getWeb3Provider() {
             params: [
               {
                 chainId: chainId,
-                chainName: 'Hardhat Localhost',
-                rpcUrls: ['http://127.0.0.1:8545'],
+                chainName: 'Sepolia Testnet',
+                rpcUrls: ['https://rpc.sepolia.org'],
                 nativeCurrency: {
-                  name: 'Ethereum',
-                  symbol: 'ETH',
+                  name: 'Sepolia ETH',
+                  symbol: 'SEP',
                   decimals: 18,
                 },
+                blockExplorerUrls: ['https://sepolia.etherscan.io'],
               },
             ],
           });
         } catch (addError) {
-          console.error("Failed to add Hardhat network to MetaMask", addError);
+          console.error("Failed to add Sepolia network to MetaMask", addError);
         }
       }
     }
