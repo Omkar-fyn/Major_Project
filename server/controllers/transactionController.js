@@ -289,8 +289,8 @@ exports.syncBlockchainTx = async (req, res) => {
     }
 
     // Verify transaction exists and is successful on the blockchain
-    // Force Sepolia RPC to bypass any stale env vars in Vercel dashboard
-    const rpcUrl = 'https://rpc.sepolia.org'; 
+    // Force highly reliable Sepolia RPC to bypass any stale env vars in Vercel dashboard and rpc.sepolia.org 404s
+    const rpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com'; 
     const provider = new ethers.JsonRpcProvider(rpcUrl);
 
     let receipt;
@@ -302,7 +302,8 @@ exports.syncBlockchainTx = async (req, res) => {
         await new Promise(r => setTimeout(r, 4000));
       }
     } catch (err) {
-      return res.status(400).json({ success: false, message: 'Invalid transaction hash format' });
+      console.error('RPC Error:', err);
+      return res.status(400).json({ success: false, message: `RPC error verifying transaction: ${err.message}` });
     }
 
     if (!receipt) {
