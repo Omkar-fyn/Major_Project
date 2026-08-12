@@ -5,8 +5,8 @@ const Ownership = require('../models/Ownership');
 const { ethers } = require('ethers');
 
 // Ensure correct contract addresses for proxying
-const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
-const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
+const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x6EAaa5074500BFC72D1b488a83eF393f31d3d02B";
+const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
 
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users
@@ -76,7 +76,7 @@ exports.getStats = async (req, res) => {
 // @route   GET /api/admin/blockchain
 exports.getBlockchainStats = async (req, res) => {
   try {
-    const rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545';
+    const rpcUrl = process.env.RPC_URL || 'https://sepolia.infura.io/v3/f0b4969d86e74233a4f94b8e73c0e947';
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     
     const blockNumber = await provider.getBlockNumber();

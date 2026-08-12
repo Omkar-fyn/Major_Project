@@ -7,11 +7,11 @@ const { ethers } = require('ethers');
 
 // Helper to get blockchain contract
 const getBlockchainContract = () => {
-  const rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545';
+  const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org';
   const provider = new ethers.JsonRpcProvider(rpcUrl);
   // Default hardhat account #0 private key for prototype
   const PRIVATE_KEY = process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-  const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
+  const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
   return new ethers.Contract(
     TOKEN_ADDRESS,
@@ -289,7 +289,7 @@ exports.syncBlockchainTx = async (req, res) => {
     }
 
     // Verify transaction exists and is successful on the blockchain
-    const rpcUrl = process.env.RPC_URL || 'http://127.0.0.1:8545'; // fallback to local hardhat
+    const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org'; // fallback to Sepolia
     const provider = new ethers.JsonRpcProvider(rpcUrl);
 
     let receipt;
