@@ -289,7 +289,8 @@ exports.syncBlockchainTx = async (req, res) => {
     }
 
     // Verify transaction exists and is successful on the blockchain
-    const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org'; // fallback to Sepolia
+    // Force Sepolia RPC to bypass any stale env vars in Vercel dashboard
+    const rpcUrl = 'https://rpc.sepolia.org'; 
     const provider = new ethers.JsonRpcProvider(rpcUrl);
 
     let receipt;

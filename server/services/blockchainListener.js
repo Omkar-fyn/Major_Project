@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Ownership = require('../models/Ownership');
 
-const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org';
+const rpcUrl = 'https://rpc.sepolia.org'; // Force Sepolia bypasses stale Vercel env vars
 const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa"; 
 const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
 
