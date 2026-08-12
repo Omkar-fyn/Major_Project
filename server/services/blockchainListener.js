@@ -4,10 +4,7 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Ownership = require('../models/Ownership');
 
-let rpcUrl = process.env.RPC_URL || 'ws://127.0.0.1:8545';
-if (rpcUrl.includes('polygon') || rpcUrl.includes('amoy')) {
-  rpcUrl = 'https://sepolia.infura.io/v3/f0b4969d86e74233a4f94b8e73c0e947';
-}
+const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org';
 const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa"; 
 const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
 

@@ -289,11 +289,7 @@ exports.syncBlockchainTx = async (req, res) => {
     }
 
     // Verify transaction exists and is successful on the blockchain
-    let rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org'; // fallback to Sepolia
-    // FORCE SEPOLIA: If Vercel dashboard has polygon-amoy cached, override it!
-    if (rpcUrl.includes('polygon') || rpcUrl.includes('amoy')) {
-      rpcUrl = 'https://sepolia.infura.io/v3/f0b4969d86e74233a4f94b8e73c0e947';
-    }
+    const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org'; // fallback to Sepolia
     const provider = new ethers.JsonRpcProvider(rpcUrl);
 
     let receipt;

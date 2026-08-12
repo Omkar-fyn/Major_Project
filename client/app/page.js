@@ -137,7 +137,7 @@ export default function Home() {
               <div className={styles.stepIcon}>👤</div>
               <div className={styles.stepNumber}>01</div>
               <h3 className={styles.stepTitle}>Create Account</h3>
-              <p className={styles.stepDesc}>Sign up and get a simulated wallet with ₹1,00,000 to start investing</p>
+              <p className={styles.stepDesc}>Sign up, connect your MetaMask wallet, and use Sepolia Testnet to start investing</p>
             </div>
             <div className={styles.stepConnector}>
               <svg width="40" height="2" viewBox="0 0 40 2"><line x1="0" y1="1" x2="40" y2="1" stroke="var(--accent-primary)" strokeWidth="2" strokeDasharray="4 4"/></svg>

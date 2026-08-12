@@ -84,7 +84,7 @@ export default function Footer() {
             © {currentYear} Asset Tokenization. All rights reserved.
           </p>
           <p className={styles.disclaimer}>
-            This is a simulated platform for educational purposes. No real financial transactions occur.
+            This is a testnet platform for educational purposes. Transactions occur on the Sepolia test network using test funds.
           </p>
         </div>
       </div>
