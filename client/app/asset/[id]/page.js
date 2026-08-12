@@ -119,8 +119,8 @@ export default function AssetDetailPage() {
       try {
         await transactionAPI.sync(id, tokenCount, receipt.hash, 'buy');
       } catch (syncErr) {
-        console.warn('Sync call returned:', syncErr.message);
-        // Not fatal — the blockchain listener will catch it as backup
+        console.error('Backend sync failed:', syncErr.message);
+        throw new Error(`Transaction confirmed by MetaMask, but backend sync failed: ${syncErr.message}`);
       }
 
       setSuccessMsg({ 
