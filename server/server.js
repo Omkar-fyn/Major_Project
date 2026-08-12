@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', process.env.FRONTEND_URL, /\.vercel\.app$/],
   credentials: true
 }));
 app.use(express.json());
