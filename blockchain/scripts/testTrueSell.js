@@ -3,8 +3,8 @@ import hre from "hardhat";
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
   
-  const tokenAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
-  const ammAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+  const tokenAddress = "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
+  const ammAddress = "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
   
   // Impersonate the TRUE user
   const trueUserAddress = "0x20D0847384A01b95c50234a7239F6fFD39f4Bcb3";

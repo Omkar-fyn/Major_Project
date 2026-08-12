@@ -11,7 +11,7 @@ const getBlockchainContract = () => {
   const provider = new ethers.JsonRpcProvider(rpcUrl);
   // Default hardhat account #0 private key for prototype
   const PRIVATE_KEY = process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-  const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
+  const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
   return new ethers.Contract(
     TOKEN_ADDRESS,

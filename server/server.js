@@ -40,11 +40,16 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, async () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api`);
-  
-  // Sync Architecture: Start blockchain listeners and perform health check
-  await checkAndSyncLocalNetworkWipe();
-  startBlockchainListener();
-});
+if (process.env.NODE_ENV !== 'production' || process.env.RENDER) {
+  app.listen(PORT, async () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 API: http://localhost:${PORT}/api`);
+    
+    // Sync Architecture: Start blockchain listeners and perform health check
+    await checkAndSyncLocalNetworkWipe();
+    startBlockchainListener();
+  });
+}
+
+// Export for Vercel Serverless Functions
+module.exports = app;

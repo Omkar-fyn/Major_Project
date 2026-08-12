@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
-export const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS || "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"; // Default hardhat address
-export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
+export const AMM_ADDRESS = process.env.NEXT_PUBLIC_AMM_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa"; // Default hardhat address
+export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
 
 export const AMM_ABI = [
   "function buyTokens() external payable",

@@ -107,7 +107,7 @@ export default function AssetDetailPage() {
       // 4. Execute blockchain transaction (Notary)
       // Since this is a prototype, we use a dummy transaction to get a real Tx Hash
       // while avoiding the AMM mathematical slippage discrepancy with the backend.
-      const tokenContractAddress = process.env.NEXT_PUBLIC_PROPERTY_TOKEN_ADDRESS || '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853';
+      const tokenContractAddress = process.env.NEXT_PUBLIC_PROPERTY_TOKEN_ADDRESS || '0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0';
       const dummyTx = await signer.sendTransaction({
         to: tokenContractAddress,
         data: '0x095ea7b3000000000000000000000000' + address.replace('0x', '') + '0000000000000000000000000000000000000000000000000000000000000000', // approve(address, 0)
@@ -184,7 +184,7 @@ export default function AssetDetailPage() {
       // 4. Execute blockchain transaction (Notary)
       // We use a dummy transaction to get a real Tx Hash and simulate on-chain interaction
       // without failing due to AMM slippage. The backend strictly manages the user's ledger.
-      const tokenContractAddress = process.env.NEXT_PUBLIC_PROPERTY_TOKEN_ADDRESS || '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853';
+      const tokenContractAddress = process.env.NEXT_PUBLIC_PROPERTY_TOKEN_ADDRESS || '0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0';
       const dummyTx = await signer.sendTransaction({
         to: tokenContractAddress,
         data: '0x095ea7b3000000000000000000000000' + address.replace('0x', '') + '0000000000000000000000000000000000000000000000000000000000000000', // approve(address, 0)

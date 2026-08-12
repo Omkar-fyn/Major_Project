@@ -3,7 +3,7 @@ import hre from "hardhat";
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
   
-  const tokenAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
+  const tokenAddress = "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
   const userAddress = "0x20D0835F5eBbBE67AfF4B4a2Ba59C03B8794bcB3";
   
   const PropertyToken = await hre.ethers.getContractFactory("PropertyToken");

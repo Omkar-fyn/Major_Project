@@ -5,8 +5,8 @@ const Ownership = require('../models/Ownership');
 const { ethers } = require('ethers');
 
 // Ensure correct contract addresses for proxying
-const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
-const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
+const AMM_ADDRESS = process.env.AMM_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
+const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
 
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users

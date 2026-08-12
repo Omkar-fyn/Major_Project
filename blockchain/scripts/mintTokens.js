@@ -3,7 +3,7 @@ import hre from "hardhat";
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
   
-  const tokenAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
+  const tokenAddress = "0xD1fD5571D7358c7e7b70df11BF6e8ef02CB463F0";
   // The ACTUAL correct address from the error trace
   const userAddress = "0x20D0847384A01b95c50234a7239F6fFD39f4Bcb3";
   
