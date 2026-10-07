@@ -77,8 +77,8 @@ export const assetAPI = {
 
 // Transactions
 export const transactionAPI = {
-  buy: (assetId, tokenCount) => apiFetch('/transactions/buy', { method: 'POST', body: JSON.stringify({ assetId, tokenCount }) }),
-  sell: (assetId, tokenCount) => apiFetch('/transactions/sell', { method: 'POST', body: JSON.stringify({ assetId, tokenCount }) }),
+  buy: (assetId, tokenCount, txHash) => apiFetch('/transactions/buy', { method: 'POST', body: JSON.stringify({ assetId, tokenCount, txHash }) }),
+  sell: (assetId, tokenCount, txHash) => apiFetch('/transactions/sell', { method: 'POST', body: JSON.stringify({ assetId, tokenCount, txHash }) }),
   sync: (assetId, tokenCount, txHash, type) => apiFetch('/transactions/sync', { method: 'POST', body: JSON.stringify({ assetId, tokenCount, txHash, type }) }),
   getMy: () => apiFetch('/transactions/my'),
   getPortfolio: () => apiFetch('/transactions/portfolio'),

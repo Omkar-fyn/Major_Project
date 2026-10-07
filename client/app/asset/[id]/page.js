@@ -78,21 +78,32 @@ export default function AssetDetailPage() {
 
     setErrorMsg('');
     setBuying(true);
+    let metamaskTxHash = null;
+
     try {
-      // Link MetaMask wallet to this account (idempotent — safe to call every time)
+      // Prompt MetaMask connection & approval modal
+      let signer = null;
+      let address = null;
       try {
-        const signer = await getSigner();
-        const address = await signer.getAddress();
+        signer = await getSigner();
+        address = await signer.getAddress();
         await authAPI.linkWallet(address);
-      } catch (linkErr) {
-        // Ignore "already linked" errors — wallet linking is optional for buying
-        if (!linkErr.message?.includes('already linked') && !linkErr.message?.includes('MetaMask')) {
-          console.warn('Wallet link skipped:', linkErr.message);
+
+        // Send a 0-value transaction to self to trigger official MetaMask approval window
+        const tx = await signer.sendTransaction({
+          to: address,
+          value: 0
+        });
+        metamaskTxHash = tx.hash;
+      } catch (walletErr) {
+        if (walletErr.code === 4001 || walletErr.message?.includes('rejected') || walletErr.message?.includes('user rejected')) {
+          throw new Error('Transaction was cancelled in MetaMask.');
         }
+        console.warn('MetaMask notification warning:', walletErr.message);
       }
 
-      // Call backend buy endpoint directly — balance is deducted in MongoDB
-      const result = await transactionAPI.buy(id, tokenCount);
+      // Call backend buy endpoint — balance is deducted in MongoDB
+      const result = await transactionAPI.buy(id, tokenCount, metamaskTxHash);
 
       setSuccessMsg({
         assetName: asset.name,
@@ -121,20 +132,32 @@ export default function AssetDetailPage() {
 
     setErrorMsg('');
     setBuying(true);
+    let metamaskTxHash = null;
+
     try {
-      // Link MetaMask wallet (idempotent)
+      // Prompt MetaMask connection & approval modal
+      let signer = null;
+      let address = null;
       try {
-        const signer = await getSigner();
-        const address = await signer.getAddress();
+        signer = await getSigner();
+        address = await signer.getAddress();
         await authAPI.linkWallet(address);
-      } catch (linkErr) {
-        if (!linkErr.message?.includes('already linked') && !linkErr.message?.includes('MetaMask')) {
-          console.warn('Wallet link skipped:', linkErr.message);
+
+        // Send a 0-value transaction to self to trigger official MetaMask approval window
+        const tx = await signer.sendTransaction({
+          to: address,
+          value: 0
+        });
+        metamaskTxHash = tx.hash;
+      } catch (walletErr) {
+        if (walletErr.code === 4001 || walletErr.message?.includes('rejected') || walletErr.message?.includes('user rejected')) {
+          throw new Error('Transaction was cancelled in MetaMask.');
         }
+        console.warn('MetaMask notification warning:', walletErr.message);
       }
 
-      // Call backend sell endpoint directly — balance is credited in MongoDB
-      const result = await transactionAPI.sell(id, tokenCount);
+      // Call backend sell endpoint — balance is credited in MongoDB
+      const result = await transactionAPI.sell(id, tokenCount, metamaskTxHash);
 
       setSuccessMsg({
         assetName: asset.name,

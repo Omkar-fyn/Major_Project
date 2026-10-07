@@ -8,7 +8,7 @@ const { ethers } = require('ethers');
 // @route   POST /api/transactions/buy
 exports.buyTokens = async (req, res) => {
   try {
-    const { assetId, tokenCount } = req.body;
+    const { assetId, tokenCount, txHash } = req.body;
     const userId = req.user._id;
 
     if (!assetId || !tokenCount || tokenCount < 1) {
@@ -72,8 +72,8 @@ exports.buyTokens = async (req, res) => {
     }
     await ownership.save();
 
-    // Generate a unique internal tx reference (no real blockchain call needed for prototype)
-    const internalTxHash = `0x${uuidv4().replace(/-/g, '')}`;
+    // Generate a unique internal tx reference fallback if metamask txHash not provided
+    const finalTxHash = txHash || `0x${uuidv4().replace(/-/g, '')}`;
 
     // Create transaction record
     const transaction = await Transaction.create({
@@ -83,7 +83,7 @@ exports.buyTokens = async (req, res) => {
       tokensBought: tokenCount,
       pricePerToken: dynamicPrice,
       totalCost,
-      blockchainTxHash: internalTxHash,
+      blockchainTxHash: finalTxHash,
       status: 'completed'
     });
 
@@ -96,7 +96,7 @@ exports.buyTokens = async (req, res) => {
         tokensBought: tokenCount,
         pricePerToken: dynamicPrice,
         totalCost,
-        txHash: internalTxHash,
+        txHash: finalTxHash,
         newBalance: user.walletBalance,
         tokensOwned: ownership.tokensOwned
       }

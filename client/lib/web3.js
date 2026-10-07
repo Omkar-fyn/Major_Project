@@ -18,7 +18,7 @@ export async function getWeb3Provider() {
   if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
     const provider = new ethers.BrowserProvider(window.ethereum);
     
-    // Auto-switch to Sepolia Testnet
+    // Auto-switch to Sepolia Testnet (non-blocking)
     const chainId = '0xaa36a7'; // Sepolia chain ID in hex
     try {
       await window.ethereum.request({
@@ -26,7 +26,6 @@ export async function getWeb3Provider() {
         params: [{ chainId: chainId }],
       });
     } catch (switchError) {
-      // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
           await window.ethereum.request({
@@ -46,8 +45,10 @@ export async function getWeb3Provider() {
             ],
           });
         } catch (addError) {
-          console.error("Failed to add Sepolia network to MetaMask", addError);
+          console.warn("User declined Sepolia network addition:", addError.message);
         }
+      } else {
+        console.warn("User declined network switch:", switchError.message);
       }
     }
 
