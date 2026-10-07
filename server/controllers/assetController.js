@@ -1,14 +1,6 @@
 const Asset = require('../models/Asset');
 const Ownership = require('../models/Ownership');
-const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
-
-// Supabase client using service role key (allows storage writes)
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
-const BUCKET = process.env.SUPABASE_BUCKET || 'assets';
 
 // In-memory price history cache (simulated live market data)
 // Key: assetId, Value: { prices: [], timestamps: [], lastUpdate: Date }
