@@ -79,55 +79,27 @@ export default function AssetDetailPage() {
     setErrorMsg('');
     setBuying(true);
     try {
-      // 1. Get MetaMask signer and address
-      const signer = await getSigner();
-      const { ammContract } = getContracts(signer);
-      const address = await signer.getAddress();
-
-      // 2. Link MetaMask wallet to this user account (idempotent)
+      // Link MetaMask wallet to this account (idempotent — safe to call every time)
       try {
+        const signer = await getSigner();
+        const address = await signer.getAddress();
         await authAPI.linkWallet(address);
       } catch (linkErr) {
-        // Ignore "already linked" errors for the same user
-        if (!linkErr.message?.includes('already linked')) {
-          throw new Error(`Wallet link failed: ${linkErr.message}`);
+        // Ignore "already linked" errors — wallet linking is optional for buying
+        if (!linkErr.message?.includes('already linked') && !linkErr.message?.includes('MetaMask')) {
+          console.warn('Wallet link skipped:', linkErr.message);
         }
       }
 
-      // 3. Auto-fund if balance is exactly 0
-      const balance = await signer.provider.getBalance(address);
-      if (balance === 0n) {
-        await fetch(`${SERVER_URL}/api/faucet`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address })
-        });
-      }
-      
-      // 4. Execute blockchain transaction (Notary)
-      // Since this is a prototype, we use a dummy transaction to get a real Tx Hash
-      // while avoiding the AMM mathematical slippage discrepancy with the backend.
-      const tokenContractAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || TOKEN_ADDRESS;
-      const dummyTx = await signer.sendTransaction({
-        to: tokenContractAddress,
-        data: '0x095ea7b3000000000000000000000000' + address.replace('0x', '') + '0000000000000000000000000000000000000000000000000000000000000000', // approve(address, 0)
-        value: 0
-      });
-      const receipt = await dummyTx.wait();
+      // Call backend buy endpoint directly — balance is deducted in MongoDB
+      const result = await transactionAPI.buy(id, tokenCount);
 
-      // 5. Explicitly sync with backend (primary path)
-      try {
-        await transactionAPI.sync(id, tokenCount, dummyTx.hash, 'buy');
-      } catch (syncErr) {
-        console.error('Backend sync failed:', syncErr.message);
-        throw new Error(`Transaction confirmed by MetaMask, but backend sync failed: ${syncErr.message}`);
-      }
-
-      setSuccessMsg({ 
-        assetName: asset.name, 
-        tokensBought: tokenCount, 
-        totalCost: totalCost, 
-        txHash: receipt.hash 
+      setSuccessMsg({
+        assetName: asset.name,
+        tokensBought: tokenCount,
+        totalCost,
+        txHash: result.transaction?.txHash,
+        newBalance: result.transaction?.newBalance
       });
       await refreshUser();
       await fetchAsset();
@@ -135,13 +107,7 @@ export default function AssetDetailPage() {
       setChartKey(prev => prev + 1);
     } catch (err) {
       console.error(err);
-      let errorText = err.message || "Transaction failed";
-      if (errorText.includes("reverted") || errorText.includes("CALL_EXCEPTION")) {
-        errorText = "Blockchain rejected the transaction. Check Hardhat console for details.";
-      } else if (errorText.includes("user rejected")) {
-        errorText = "Transaction was cancelled in MetaMask.";
-      }
-      setErrorMsg(errorText);
+      setErrorMsg(err.message || 'Transaction failed');
     } finally {
       setBuying(false);
     }
@@ -156,55 +122,26 @@ export default function AssetDetailPage() {
     setErrorMsg('');
     setBuying(true);
     try {
-      // 1. Get MetaMask signer and address
-      const signer = await getSigner();
-      const { ammContract, tokenContract } = getContracts(signer);
-      const ammAddress = await ammContract.getAddress();
-      const address = await signer.getAddress();
-
-      // 2. Link MetaMask wallet to this user account (idempotent)
+      // Link MetaMask wallet (idempotent)
       try {
+        const signer = await getSigner();
+        const address = await signer.getAddress();
         await authAPI.linkWallet(address);
       } catch (linkErr) {
-        if (!linkErr.message?.includes('already linked')) {
-          throw new Error(`Wallet link failed: ${linkErr.message}`);
+        if (!linkErr.message?.includes('already linked') && !linkErr.message?.includes('MetaMask')) {
+          console.warn('Wallet link skipped:', linkErr.message);
         }
       }
 
-      // 3. Auto-fund if balance is exactly 0
-      const balance = await signer.provider.getBalance(address);
-      if (balance === 0n) {
-        await fetch(`${SERVER_URL}/api/faucet`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address })
-        });
-      }
+      // Call backend sell endpoint directly — balance is credited in MongoDB
+      const result = await transactionAPI.sell(id, tokenCount);
 
-      // 4. Execute blockchain transaction (Notary)
-      // We use a dummy transaction to get a real Tx Hash and simulate on-chain interaction
-      // without failing due to AMM slippage. The backend strictly manages the user's ledger.
-      const tokenContractAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || TOKEN_ADDRESS;
-      const dummyTx = await signer.sendTransaction({
-        to: tokenContractAddress,
-        data: '0x095ea7b3000000000000000000000000' + address.replace('0x', '') + '0000000000000000000000000000000000000000000000000000000000000000', // approve(address, 0)
-        value: 0
-      });
-      const receipt = await dummyTx.wait();
-
-      // 5. Explicitly sync with backend (primary path)
-      try {
-        await transactionAPI.sync(id, tokenCount, receipt.hash, 'sell');
-      } catch (syncErr) {
-        console.warn('Sync call returned:', syncErr.message);
-        // Not fatal — the blockchain listener will catch it as backup
-      }
-      
-      setSuccessMsg({ 
-        assetName: asset.name, 
-        tokensSold: tokenCount, 
-        totalCost: totalCost, 
-        txHash: receipt.hash 
+      setSuccessMsg({
+        assetName: asset.name,
+        tokensSold: tokenCount,
+        totalCost,
+        txHash: result.transaction?.txHash,
+        newBalance: result.transaction?.newBalance
       });
       await refreshUser();
       await fetchAsset();
@@ -212,13 +149,7 @@ export default function AssetDetailPage() {
       setChartKey(prev => prev + 1);
     } catch (err) {
       console.error(err);
-      let errorText = err.message || "Transaction failed";
-      if (errorText.includes("reverted") || errorText.includes("CALL_EXCEPTION")) {
-        errorText = "Blockchain rejected the transaction. Make sure you have enough tokens on-chain.";
-      } else if (errorText.includes("user rejected")) {
-        errorText = "Transaction was cancelled in MetaMask.";
-      }
-      setErrorMsg(errorText);
+      setErrorMsg(err.message || 'Transaction failed');
     } finally {
       setBuying(false);
     }

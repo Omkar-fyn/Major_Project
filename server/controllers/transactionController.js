@@ -4,21 +4,6 @@ const Transaction = require('../models/Transaction');
 const Ownership = require('../models/Ownership');
 const { v4: uuidv4 } = require('uuid');
 const { ethers } = require('ethers');
-
-// Helper to get blockchain contract
-const getBlockchainContract = () => {
-  const rpcUrl = process.env.RPC_URL || 'https://rpc.sepolia.org';
-  const provider = new ethers.JsonRpcProvider(rpcUrl);
-  // Default hardhat account #0 private key for prototype
-  const PRIVATE_KEY = process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-  const TOKEN_ADDRESS = process.env.TOKEN_ADDRESS || "0x3c4B0c7E9307629c25D3015EE449Ad656B1A00aa";
-  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-  return new ethers.Contract(
-    TOKEN_ADDRESS,
-    ['function mint(address to, uint256 amount) external', 'function burn(address from, uint256 amount) external'],
-    wallet
-  );
-};
 // @desc    Buy tokens
 // @route   POST /api/transactions/buy
 exports.buyTokens = async (req, res) => {
@@ -87,18 +72,8 @@ exports.buyTokens = async (req, res) => {
     }
     await ownership.save();
 
-    // Execute actual blockchain mint transaction
-    let actualTxHash;
-    try {
-      const tokenContract = getBlockchainContract();
-      // Mint tokens to the user's walletId
-      const tx = await tokenContract.mint(user.walletId, ethers.parseEther(tokenCount.toString()));
-      await tx.wait(); // Wait for confirmation
-      actualTxHash = tx.hash;
-    } catch (blockchainError) {
-      console.error("Blockchain mint failed:", blockchainError);
-      return res.status(500).json({ success: false, message: 'Blockchain transaction failed' });
-    }
+    // Generate a unique internal tx reference (no real blockchain call needed for prototype)
+    const internalTxHash = `0x${uuidv4().replace(/-/g, '')}`;
 
     // Create transaction record
     const transaction = await Transaction.create({
@@ -108,7 +83,7 @@ exports.buyTokens = async (req, res) => {
       tokensBought: tokenCount,
       pricePerToken: dynamicPrice,
       totalCost,
-      blockchainTxHash: actualTxHash,
+      blockchainTxHash: internalTxHash,
       status: 'completed'
     });
 
@@ -121,7 +96,7 @@ exports.buyTokens = async (req, res) => {
         tokensBought: tokenCount,
         pricePerToken: dynamicPrice,
         totalCost,
-        txHash: actualTxHash,
+        txHash: internalTxHash,
         newBalance: user.walletBalance,
         tokensOwned: ownership.tokensOwned
       }
@@ -184,18 +159,8 @@ exports.sellTokens = async (req, res) => {
       await ownership.save();
     }
 
-    // Execute actual blockchain burn transaction
-    let actualTxHash;
-    try {
-      const tokenContract = getBlockchainContract();
-      // Burn tokens from the user's walletId
-      const tx = await tokenContract.burn(user.walletId, ethers.parseEther(tokenCount.toString()));
-      await tx.wait(); // Wait for confirmation
-      actualTxHash = tx.hash;
-    } catch (blockchainError) {
-      console.error("Blockchain burn failed:", blockchainError);
-      return res.status(500).json({ success: false, message: 'Blockchain transaction failed' });
-    }
+    // Generate a unique internal tx reference
+    const internalTxHash = `0x${uuidv4().replace(/-/g, '')}`;
 
     // Create transaction record
     const transaction = await Transaction.create({
@@ -205,7 +170,7 @@ exports.sellTokens = async (req, res) => {
       tokensSold: tokenCount,
       pricePerToken: dynamicPrice,
       totalCost: totalValue,
-      blockchainTxHash: actualTxHash,
+      blockchainTxHash: internalTxHash,
       status: 'completed'
     });
 
@@ -218,7 +183,7 @@ exports.sellTokens = async (req, res) => {
         tokensSold: tokenCount,
         pricePerToken: dynamicPrice,
         totalValue,
-        txHash: actualTxHash,
+        txHash: internalTxHash,
         newBalance: user.walletBalance,
         tokensOwned: ownership.tokensOwned
       }

@@ -1,5 +1,14 @@
 const Asset = require('../models/Asset');
 const Ownership = require('../models/Ownership');
+const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
+
+// Supabase client using service role key (allows storage writes)
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+const BUCKET = process.env.SUPABASE_BUCKET || 'assets';
 
 // In-memory price history cache (simulated live market data)
 // Key: assetId, Value: { prices: [], timestamps: [], lastUpdate: Date }
@@ -198,7 +207,24 @@ exports.createAsset = async (req, res) => {
     };
 
     if (req.file) {
-      assetData.image = `/uploads/${req.file.filename}`;
+      // Upload image buffer to Supabase Storage
+      const ext = path.extname(req.file.originalname).toLowerCase();
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET)
+        .upload(filename, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false
+        });
+
+      if (uploadError) {
+        return res.status(500).json({ success: false, message: `Image upload failed: ${uploadError.message}` });
+      }
+
+      // Get the public URL from Supabase CDN
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(filename);
+      assetData.image = data.publicUrl;
     }
 
     const asset = await Asset.create(assetData);
