@@ -257,7 +257,7 @@ export default function AssetDetailPage() {
           <div className={styles.assetInfo}>
             <div className={styles.imageSection}>
               {asset.image ? (
-                <img src={`${SERVER_URL}${asset.image}`} alt={asset.name} className={styles.assetImage} />
+                <img src={asset.image.startsWith('http') || asset.image.startsWith('data:') ? asset.image : `${SERVER_URL}${asset.image}`} alt={asset.name} className={styles.assetImage} />
               ) : (
                 <div className={styles.imagePlaceholder}>
                   <span style={{ fontSize: '4rem' }}>🏢</span>

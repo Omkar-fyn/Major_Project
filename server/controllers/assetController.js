@@ -207,24 +207,10 @@ exports.createAsset = async (req, res) => {
     };
 
     if (req.file) {
-      // Upload image buffer to Supabase Storage
-      const ext = path.extname(req.file.originalname).toLowerCase();
-      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
-        .upload(filename, req.file.buffer, {
-          contentType: req.file.mimetype,
-          upsert: false
-        });
-
-      if (uploadError) {
-        return res.status(500).json({ success: false, message: `Image upload failed: ${uploadError.message}` });
-      }
-
-      // Get the public URL from Supabase CDN
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(filename);
-      assetData.image = data.publicUrl;
+      // Store image directly in MongoDB as a Base64 Data URI.
+      // This is zero-config, works 100% on Vercel, and requires no external cloud services or env vars.
+      const mimeType = req.file.mimetype || 'image/jpeg';
+      assetData.image = `data:${mimeType};base64,${req.file.buffer.toString('base64')}`;
     }
 
     const asset = await Asset.create(assetData);

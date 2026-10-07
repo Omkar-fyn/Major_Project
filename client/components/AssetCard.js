@@ -10,7 +10,7 @@ export default function AssetCard({ asset }) {
     <Link href={`/asset/${asset._id}`} className={styles.card}>
       <div className={styles.imageWrap}>
         {asset.image ? (
-          <img src={`${SERVER_URL}${asset.image}`} alt={asset.name} className={styles.image} />
+          <img src={asset.image.startsWith('http') || asset.image.startsWith('data:') ? asset.image : `${SERVER_URL}${asset.image}`} alt={asset.name} className={styles.image} />
         ) : (
           <div className={styles.imagePlaceholder}>
             <span className={styles.placeholderIcon}>🏢</span>
